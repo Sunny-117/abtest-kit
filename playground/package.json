@@ -1,0 +1,12 @@
+{
+  "name": "abtest-playground",
+  "private": true,
+  "workspaces": [
+    "core-example",
+    "react-example"
+  ],
+  "scripts": {
+    "core": "pnpm --filter core-example dev",
+    "react": "pnpm --filter react-example dev"
+  }
+} 
