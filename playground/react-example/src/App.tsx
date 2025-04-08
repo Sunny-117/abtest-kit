@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { ABTestProvider, ABTestContainer, ABTestVariant, useABTest } from '@abtest/react';
+import { ABTestProvider, ABTestContainer, ABTestSwitch, useABTest } from '@abtest/react';
 import { mockAllocateExperiments } from '@abtest/core';
 
 // 默认组件
@@ -84,21 +84,21 @@ const App = () => {
 
         <p>实验展示</p>
         <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-          <ABTestVariant variantId="new">
+          <ABTestSwitch variantId="new">
             <NewFeature />
-          </ABTestVariant>
-          <ABTestVariant variantId="old">
+          </ABTestSwitch>
+          <ABTestSwitch variantId="old">
             <OldFeature />
-          </ABTestVariant>
+          </ABTestSwitch>
         </ABTestContainer>
 
         <ABTestContainer experimentId="feature-y" fallbackComponent={<DefaultComponent />}>
-          <ABTestVariant variantId="new">
+          <ABTestSwitch variantId="new">
             <NewFeature />
-          </ABTestVariant>
-          <ABTestVariant variantId="old">
+          </ABTestSwitch>
+          <ABTestSwitch variantId="old">
             <OldFeature />
-          </ABTestVariant>
+          </ABTestSwitch>
         </ABTestContainer>
       </div>
     </ABTestProvider>

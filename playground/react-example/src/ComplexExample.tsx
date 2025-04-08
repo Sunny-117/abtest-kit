@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ABTestProvider, ABTestContainer, ABTestVariant, useABTest } from '@abtest/react';
+import { ABTestProvider, ABTestContainer, ABTestSwitch, useABTest } from '@abtest/react';
 import { mockAllocateExperiments } from '@abtest/core';
 
 // 默认组件
@@ -99,12 +99,12 @@ const ComplexExample = () => {
         <div>
           <h3>Binary Choice Experiment</h3>
           <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-            <ABTestVariant variantId="new">
+            <ABTestSwitch variantId="new">
               <NewFeature />
-            </ABTestVariant>
-            <ABTestVariant variantId="old">
+            </ABTestSwitch>
+            <ABTestSwitch variantId="old">
               <OldFeature />
-            </ABTestVariant>
+            </ABTestSwitch>
           </ABTestContainer>
         </div>
 
@@ -112,15 +112,15 @@ const ComplexExample = () => {
         <div>
           <h3>Multi Variant Experiment</h3>
           <ABTestContainer experimentId="multi-variant" fallbackComponent={<DefaultComponent />}>
-            <ABTestVariant variantId="variant1">
+            <ABTestSwitch variantId="variant1">
               <Variant1 />
-            </ABTestVariant>
-            <ABTestVariant variantId="variant2">
+            </ABTestSwitch>
+            <ABTestSwitch variantId="variant2">
               <Variant2 />
-            </ABTestVariant>
-            <ABTestVariant variantId="variant3">
+            </ABTestSwitch>
+            <ABTestSwitch variantId="variant3">
               <Variant3 />
-            </ABTestVariant>
+            </ABTestSwitch>
           </ABTestContainer>
         </div>
       </div>

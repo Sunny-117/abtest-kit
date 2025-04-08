@@ -20,7 +20,7 @@ npm install @abtest/react
 ### 基本用法
 
 ```tsx
-import { ABTestProvider, ABTestContainer, ABTestVariant, useABTest } from '@abtest/react';
+import { ABTestProvider, ABTestContainer, ABTestSwitch, useABTest } from '@abtest/react';
 
 // 默认组件
 const DefaultComponent = () => <div>Default Feature</div>;
@@ -69,12 +69,12 @@ const App = () => {
     <ABTestProvider>
       <ExperimentManager />
       <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-        <ABTestVariant variantId="new">
+        <ABTestSwitch variantId="new">
           <NewFeature />
-        </ABTestVariant>
-        <ABTestVariant variantId="old">
+        </ABTestSwitch>
+        <ABTestSwitch variantId="old">
           <OldFeature />
-        </ABTestVariant>
+        </ABTestSwitch>
       </ABTestContainer>
     </ABTestProvider>
   );
@@ -91,25 +91,25 @@ const App = () => {
       
       {/* 二选一实验 */}
       <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-        <ABTestVariant variantId="new">
+        <ABTestSwitch variantId="new">
           <NewFeature />
-        </ABTestVariant>
-        <ABTestVariant variantId="old">
+        </ABTestSwitch>
+        <ABTestSwitch variantId="old">
           <OldFeature />
-        </ABTestVariant>
+        </ABTestSwitch>
       </ABTestContainer>
 
       {/* 多选实验 */}
       <ABTestContainer experimentId="multi-variant" fallbackComponent={<DefaultComponent />}>
-        <ABTestVariant variantId="variant1">
+        <ABTestSwitch variantId="variant1">
           <Variant1 />
-        </ABTestVariant>
-        <ABTestVariant variantId="variant2">
+        </ABTestSwitch>
+        <ABTestSwitch variantId="variant2">
           <Variant2 />
-        </ABTestVariant>
-        <ABTestVariant variantId="variant3">
+        </ABTestSwitch>
+        <ABTestSwitch variantId="variant3">
           <Variant3 />
-        </ABTestVariant>
+        </ABTestSwitch>
       </ABTestContainer>
     </ABTestProvider>
   );
@@ -131,7 +131,7 @@ const App = () => {
     - `fallbackComponent`: 默认组件
     - `children`: 实验变体组件
 
-- `ABTestVariant`: 实验变体组件
+- `ABTestSwitch`: 实验变体组件
   - Props:
     - `variantId`: 变体ID
     - `children`: 变体内容

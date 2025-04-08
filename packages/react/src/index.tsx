@@ -84,7 +84,7 @@ interface ABTestVariantProps {
  * ABTest Variant
  * 根据变体ID显示对应的内容
  */
-export const ABTestVariant: React.FC<ABTestVariantProps> = ({ variantId, children }) => {
+export const ABTestSwitch: React.FC<ABTestVariantProps> = ({ variantId, children }) => {
   const manager = useABTest();
   const allocation = manager.getAllocation(variantId);
 
