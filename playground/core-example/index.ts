@@ -4,29 +4,29 @@ import { ABTestManager } from '@abtest/core';
 const abTestManager = new ABTestManager();
 
 // 添加实验分配结果
-abTestManager.addAllocation('feature-x', {
-  experimentId: 'feature-x',
+abTestManager.addAllocation('1001', {
+  experimentId: '1001',
   variantId: 'new'
 });
 
-abTestManager.addAllocation('feature-y', {
-  experimentId: 'feature-y',
+abTestManager.addAllocation('1002', {
+  experimentId: '1002',
   variantId: 'old'
 });
 
 // 获取并打印实验状态
-console.log('Feature X allocation:', abTestManager.getAllocation('feature-x'));
-console.log('Feature Y allocation:', abTestManager.getAllocation('feature-y'));
+console.log('1001 allocation:', abTestManager.getAllocation('1001'));
+console.log('1002 allocation:', abTestManager.getAllocation('1002'));
 
 // 根据实验状态执行不同逻辑
-const featureXAllocation = abTestManager.getAllocation('feature-x');
+const featureXAllocation = abTestManager.getAllocation('1001');
 if (featureXAllocation?.variantId === 'new') {
   console.log('Using new feature X');
 } else {
   console.log('Using old feature X');
 }
 
-const featureYAllocation = abTestManager.getAllocation('feature-y');
+const featureYAllocation = abTestManager.getAllocation('1002');
 if (featureYAllocation?.variantId === 'new') {
   console.log('Using new feature Y');
 } else {

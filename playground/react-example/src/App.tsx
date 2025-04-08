@@ -6,10 +6,10 @@ import { mockAllocateExperiments } from '@abtest/core';
 const DefaultComponent = () => <div>Default Feature</div>;
 
 // 新功能组件
-const NewFeature = () => <div>New Feature</div>;
+const NewFeature = () => <div>实验组1</div>;
 
 // 旧功能组件
-const OldFeature = () => <div>Old Feature</div>;
+const OldFeature = () => <div>对照组</div>;
 
 /**
  * 实验管理组件
@@ -25,14 +25,14 @@ const ExperimentManager = () => {
         // 定义要分配的实验配置
         const experiments = [
           {
-            id: 'feature-x',
-            name: 'Feature X Test',
-            variants: ['new', 'old']
+            id: '1001',
+            name: '1001 Test',
+            variants: ['对照组', '实验组1']
           },
           {
-            id: 'feature-y',
-            name: 'Feature Y Test',
-            variants: ['new', 'old']
+            id: '1002',
+            name: '1002 Test',
+            variants: ['对照组', '实验组1']
           }
         ];
 
@@ -59,12 +59,11 @@ const ExperimentManager = () => {
 
   return (
     <div>
-      <h2>Experiment Status</h2>
       <div>
-        Feature X: {abTestManager.getAllocation('feature-x')?.variantId || 'not allocated'}
+        1001: {abTestManager.getAllocation('1001')?.variantId || 'not allocated'}
       </div>
       <div>
-        Feature Y: {abTestManager.getAllocation('feature-y')?.variantId || 'not allocated'}
+        1002: {abTestManager.getAllocation('1002')?.variantId || 'not allocated'}
       </div>
     </div>
   );
@@ -79,24 +78,27 @@ const App = () => {
       <div>
         <h1>A/B Testing Example</h1>
         
-        <p>实验管理</p>
+        <h3>实验管理</h3>
         <ExperimentManager />
 
-        <p>实验展示</p>
-        <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-          <ABTestSwitch experimentId="feature-x" variantId="new">
+        <h3>实验展示</h3>
+        <p>
+          1001
+        </p>
+        <ABTestContainer experimentId="1001" fallbackComponent={<DefaultComponent />}>
+          <ABTestSwitch experimentId="1001" variantId="对照组">
             <NewFeature />
           </ABTestSwitch>
-          <ABTestSwitch experimentId="feature-x" variantId="old">
+          <ABTestSwitch experimentId="1001" variantId="实验组1">
             <OldFeature />
           </ABTestSwitch>
         </ABTestContainer>
-
-        <ABTestContainer experimentId="feature-y" fallbackComponent={<DefaultComponent />}>
-          <ABTestSwitch experimentId="feature-y" variantId="new">
+        <p>1002</p>
+        <ABTestContainer experimentId="1002" fallbackComponent={<DefaultComponent />}>
+          <ABTestSwitch experimentId="1002" variantId="对照组">
             <NewFeature />
           </ABTestSwitch>
-          <ABTestSwitch experimentId="feature-y" variantId="old">
+          <ABTestSwitch experimentId="1002" variantId="实验组1">
             <OldFeature />
           </ABTestSwitch>
         </ABTestContainer>

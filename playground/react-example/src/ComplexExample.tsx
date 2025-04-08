@@ -33,13 +33,13 @@ const ExperimentManager = () => {
         // 定义多个实验配置
         const experiments = [
           {
-            id: 'feature-x',
-            name: 'Feature X Test',
+            id: '1001',
+            name: '1001 Test',
             variants: ['new', 'old']
           },
           {
-            id: 'feature-y',
-            name: 'Feature Y Test',
+            id: '1002',
+            name: '1002 Test',
             variants: ['new', 'old']
           },
           {
@@ -71,10 +71,10 @@ const ExperimentManager = () => {
     <div>
       <h2>Experiment Status</h2>
       <div>
-        Feature X: {abTestManager.getAllocation('feature-x')?.variantId || 'not allocated'}
+        1001: {abTestManager.getAllocation('1001')?.variantId || 'not allocated'}
       </div>
       <div>
-        Feature Y: {abTestManager.getAllocation('feature-y')?.variantId || 'not allocated'}
+        1002: {abTestManager.getAllocation('1002')?.variantId || 'not allocated'}
       </div>
       <div>
         Multi Variant: {abTestManager.getAllocation('multi-variant')?.variantId || 'not allocated'}
@@ -98,7 +98,7 @@ const ComplexExample = () => {
         {/* 二选一实验 */}
         <div>
           <h3>Binary Choice Experiment</h3>
-          <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
+          <ABTestContainer experimentId="1001" fallbackComponent={<DefaultComponent />}>
             <ABTestSwitch variantId="new">
               <NewFeature />
             </ABTestSwitch>
