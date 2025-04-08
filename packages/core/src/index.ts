@@ -1,26 +1,41 @@
-import { ABTestManagerOptions, ABTestResult } from './types';
+import { ABTestOptions, Allocation, Experiment } from './types';
 
-export { ABTestConfig, ABTestResult } from './types';
+export { Experiment, Allocation } from './types';
+export { mockAllocateExperiments } from './mock';
 
 export class ABTestManager {
-  private experiments: Record<string, ABTestResult>;
+  private allocations: Record<string, Allocation>;
 
-  constructor(options?: ABTestManagerOptions) {
-    this.experiments = options?.initialExperiments || {};
+  constructor(options?: ABTestOptions) {
+    this.allocations = options?.initialAllocations || {};
   }
 
-  addExperiment(key: string, result: ABTestResult): void {
-    this.experiments = {
-      ...this.experiments,
-      [key]: result,
+  /**
+   * 添加实验分配结果
+   * @param experimentId 实验ID
+   * @param allocation 分配结果
+   */
+  addAllocation(experimentId: string, allocation: Allocation): void {
+    this.allocations = {
+      ...this.allocations,
+      [experimentId]: allocation,
     };
   }
 
-  getExperiment(key: string): ABTestResult | undefined {
-    return this.experiments[key];
+  /**
+   * 获取实验分配结果
+   * @param experimentId 实验ID
+   * @returns 分配结果
+   */
+  getAllocation(experimentId: string): Allocation | undefined {
+    return this.allocations[experimentId];
   }
 
-  getExperiments(): Record<string, ABTestResult> {
-    return this.experiments;
+  /**
+   * 获取所有实验分配结果
+   * @returns 所有分配结果
+   */
+  getAllAllocations(): Record<string, Allocation> {
+    return this.allocations;
   }
-} 
+}

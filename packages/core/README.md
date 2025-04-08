@@ -1,101 +1,87 @@
 # @abtest/core
 
-Core A/B testing infrastructure that is framework-agnostic.
+ABTest 核心包，提供实验管理和分配的基础功能。
 
-## Installation
+## 功能特性
+
+- 实验配置管理
+- 实验分配结果管理
+- 模拟实验分配
+
+## 安装
 
 ```bash
 npm install @abtest/core
-# or
-yarn add @abtest/core
-# or
-pnpm add @abtest/core
 ```
 
-## Usage
+## 使用示例
+
+### 基本用法
 
 ```typescript
 import { ABTestManager } from '@abtest/core';
 
-// Create an instance
+// 创建 ABTest 管理器实例
 const abTestManager = new ABTestManager();
 
-// Add an experiment
-abTestManager.addExperiment('feature-x', {
-  group: 'new',
-  config: {
-    key: 'feature-x',
-    version: '1.0.0',
-    metadata: {
-      description: 'New feature experiment'
-    }
-  }
+// 添加实验分配结果
+abTestManager.addAllocation('feature-x', {
+  experimentId: 'feature-x',
+  variantId: 'new'
 });
 
-// Get experiment status
-const experiment = abTestManager.getExperiment('feature-x');
+// 获取实验分配结果
+const allocation = abTestManager.getAllocation('feature-x');
+console.log(allocation?.variantId); // 'new'
+```
 
-// Use experiment status
-if (experiment?.group === 'new') {
-  // Use new feature
-} else {
-  // Use old feature
-}
+### 模拟实验分配
 
-// Get all experiments
-const allExperiments = abTestManager.getExperiments();
+```typescript
+import { mockAllocateExperiments } from '@abtest/core';
+
+// 定义实验配置
+const experiments = [
+  {
+    id: 'feature-x',
+    name: 'Feature X Test',
+    variants: ['new', 'old']
+  }
+];
+
+// 获取实验分配结果
+const allocations = await mockAllocateExperiments(experiments);
+console.log(allocations); // [{ experimentId: 'feature-x', variantId: 'new' }]
 ```
 
 ## API
 
 ### ABTestManager
 
-The core class for managing A/B tests.
+- `constructor(options?: ABTestOptions)`: 创建 ABTest 管理器实例
+- `addAllocation(experimentId: string, allocation: Allocation)`: 添加实验分配结果
+- `getAllocation(experimentId: string)`: 获取实验分配结果
+- `getAllAllocations()`: 获取所有实验分配结果
 
-#### Constructor
+### mockAllocateExperiments
 
-```typescript
-new ABTestManager(options?: ABTestManagerOptions)
-```
+- `mockAllocateExperiments(experiments: Experiment[]): Promise<Allocation[]>`: 模拟实验分配
 
-Options:
-- `initialExperiments`: Initial set of experiments (optional)
-
-#### Methods
-
-- `addExperiment(key: string, result: ABTestResult): void`
-  - Add or update an experiment
-- `getExperiment(key: string): ABTestResult | undefined`
-  - Get experiment by key
-- `getExperiments(): Record<string, ABTestResult>`
-  - Get all experiments
-
-### Types
-
-#### ABTestConfig
+## 类型定义
 
 ```typescript
-interface ABTestConfig {
-  key: string;
-  version?: string;
-  metadata?: Record<string, any>;
+interface Experiment {
+  id: string;
+  name: string;
+  variants: string[];
 }
-```
 
-#### ABTestResult
-
-```typescript
-interface ABTestResult {
-  group: string;
-  config: ABTestConfig;
-  metadata?: Record<string, any>;
+interface Allocation {
+  experimentId: string;
+  variantId: string;
 }
-```
 
-#### ABTestManagerOptions
-
-```typescript
-interface ABTestManagerOptions {
-  initialExperiments?: Record<string, ABTestResult>;
+interface ABTestOptions {
+  initialAllocations?: Record<string, Allocation>;
 }
 ``` 

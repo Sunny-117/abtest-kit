@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
-import { ABTestManager, ABTestConfig, ABTestResult } from '@abtest/core';
+import { ABTestManager, Allocation } from '@abtest/core';
 
+// 创建 ABTest 上下文
 const ABTestContext = createContext<ABTestManager | null>(null);
 
+/**
+ * ABTest Hook
+ * 用于在组件中访问 ABTest 管理器
+ */
 export const useABTest = () => {
   const context = useContext(ABTestContext);
   if (!context) {
@@ -11,16 +16,23 @@ export const useABTest = () => {
   return context;
 };
 
+/**
+ * ABTest Provider Props
+ */
 interface ABTestProviderProps {
   children: React.ReactNode;
-  initialExperiments?: Record<string, ABTestResult>;
+  initialAllocations?: Record<string, Allocation>;
 }
 
+/**
+ * ABTest Provider
+ * 提供 ABTest 上下文给子组件
+ */
 export const ABTestProvider: React.FC<ABTestProviderProps> = ({
   children,
-  initialExperiments,
+  initialAllocations,
 }) => {
-  const [manager] = useState(() => new ABTestManager({ initialExperiments }));
+  const [manager] = useState(() => new ABTestManager({ initialAllocations }));
 
   return (
     <ABTestContext.Provider value={manager}>
@@ -29,37 +41,54 @@ export const ABTestProvider: React.FC<ABTestProviderProps> = ({
   );
 };
 
+/**
+ * ABTest Container Props
+ */
 interface ABTestContainerProps {
-  config: ABTestConfig;
+  // 实验ID
+  experimentId: string;
+  // 默认组件，当实验未分配时显示
   fallbackComponent?: React.ReactNode;
   children: React.ReactNode;
 }
 
-interface ABTestSwitchProps {
-  name: string;
-  children?: React.ReactNode;
-}
-
+/**
+ * ABTest Container
+ * 根据实验分配结果显示不同的内容
+ */
 export const ABTestContainer: React.FC<ABTestContainerProps> = ({
-  config,
+  experimentId,
   fallbackComponent,
   children,
 }) => {
   const manager = useABTest();
-  const experiment = manager.getExperiment(config.key);
+  const allocation = manager.getAllocation(experimentId);
 
-  if (!experiment) {
+  if (!allocation) {
     return <>{fallbackComponent}</>;
   }
 
   return <>{children}</>;
 };
 
-export const ABTestSwitch: React.FC<ABTestSwitchProps> = ({ name, children }) => {
-  const manager = useABTest();
-  const experiment = manager.getExperiment(name);
+/**
+ * ABTest Variant Props
+ */
+interface ABTestVariantProps {
+  // 变体ID
+  variantId: string;
+  children?: React.ReactNode;
+}
 
-  if (!experiment || experiment.group !== name) {
+/**
+ * ABTest Variant
+ * 根据变体ID显示对应的内容
+ */
+export const ABTestVariant: React.FC<ABTestVariantProps> = ({ variantId, children }) => {
+  const manager = useABTest();
+  const allocation = manager.getAllocation(variantId);
+
+  if (!allocation || allocation.variantId !== variantId) {
     return null;
   }
 

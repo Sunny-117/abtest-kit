@@ -1,119 +1,164 @@
 # @abtest/react
 
-React components for A/B testing, built on top of @abtest/core.
+ABTest 的 React 实现，提供 React 组件和 Hook 来管理实验。
 
-## Installation
+## 功能特性
+
+- React 组件支持
+- 实验状态管理
+- 条件渲染
+- 多实验场景支持
+
+## 安装
 
 ```bash
 npm install @abtest/react
-# or
-yarn add @abtest/react
-# or
-pnpm add @abtest/react
 ```
 
-## Usage
+## 使用示例
 
-### Basic Usage
+### 基本用法
 
 ```tsx
-import { ABTestProvider, ABTestContainer, ABTestSwitch } from '@abtest/react';
+import { ABTestProvider, ABTestContainer, ABTestVariant, useABTest } from '@abtest/react';
 
-function App() {
+// 默认组件
+const DefaultComponent = () => <div>Default Feature</div>;
+
+// 新功能组件
+const NewFeature = () => <div>New Feature</div>;
+
+// 旧功能组件
+const OldFeature = () => <div>Old Feature</div>;
+
+// 实验管理组件
+const ExperimentManager = () => {
+  const abTestManager = useABTest();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const allocateExperiments = async () => {
+      try {
+        const experiments = [
+          {
+            id: 'feature-x',
+            name: 'Feature X Test',
+            variants: ['new', 'old']
+          }
+        ];
+
+        const allocations = await mockAllocateExperiments(experiments);
+        allocations.forEach(allocation => {
+          abTestManager.addAllocation(allocation.experimentId, allocation);
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    allocateExperiments();
+  }, [abTestManager]);
+
+  if (loading) return <div>Loading...</div>;
+  return null;
+};
+
+// 主应用组件
+const App = () => {
   return (
     <ABTestProvider>
-      <ABTestContainer config={{ key: 'feature-x' }} fallbackComponent={<DefaultComponent />}>
-        <ABTestSwitch name="new">
+      <ExperimentManager />
+      <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
+        <ABTestVariant variantId="new">
           <NewFeature />
-        </ABTestSwitch>
-        <ABTestSwitch name="old">
+        </ABTestVariant>
+        <ABTestVariant variantId="old">
           <OldFeature />
-        </ABTestSwitch>
+        </ABTestVariant>
       </ABTestContainer>
     </ABTestProvider>
   );
-}
+};
 ```
 
-### Nested Experiments
+### 多实验场景
 
 ```tsx
-import { ABTestProvider, ABTestContainer, ABTestSwitch } from '@abtest/react';
-
-function App() {
+const App = () => {
   return (
     <ABTestProvider>
-      <ABTestContainer config={{ key: 'parent-feature' }} fallbackComponent={<DefaultComponent />}>
-        <ABTestSwitch name="new">
-          <ABTestContainer config={{ key: 'nested-feature' }}>
-            <ABTestSwitch name="new">
-              <NewNestedFeature />
-            </ABTestSwitch>
-            <ABTestSwitch name="old">
-              <OldNestedFeature />
-            </ABTestSwitch>
-          </ABTestContainer>
-        </ABTestSwitch>
-        <ABTestSwitch name="old">
+      <ExperimentManager />
+      
+      {/* 二选一实验 */}
+      <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
+        <ABTestVariant variantId="new">
+          <NewFeature />
+        </ABTestVariant>
+        <ABTestVariant variantId="old">
           <OldFeature />
-        </ABTestSwitch>
+        </ABTestVariant>
+      </ABTestContainer>
+
+      {/* 多选实验 */}
+      <ABTestContainer experimentId="multi-variant" fallbackComponent={<DefaultComponent />}>
+        <ABTestVariant variantId="variant1">
+          <Variant1 />
+        </ABTestVariant>
+        <ABTestVariant variantId="variant2">
+          <Variant2 />
+        </ABTestVariant>
+        <ABTestVariant variantId="variant3">
+          <Variant3 />
+        </ABTestVariant>
       </ABTestContainer>
     </ABTestProvider>
   );
-}
+};
 ```
 
 ## API
 
-### ABTestProvider
+### 组件
 
-The provider component that makes the A/B test context available to all child components.
+- `ABTestProvider`: 提供 ABTest 上下文
+  - Props:
+    - `children`: React 节点
+    - `initialAllocations`: 初始实验分配结果
 
-```tsx
-<ABTestProvider initialExperiments={initialExperiments}>
-  {children}
-</ABTestProvider>
-```
+- `ABTestContainer`: 实验容器组件
+  - Props:
+    - `experimentId`: 实验ID
+    - `fallbackComponent`: 默认组件
+    - `children`: 实验变体组件
 
-Props:
-- `initialExperiments`: Initial set of experiments (optional)
-- `children`: React nodes
+- `ABTestVariant`: 实验变体组件
+  - Props:
+    - `variantId`: 变体ID
+    - `children`: 变体内容
 
-### ABTestContainer
+### Hook
 
-Container component that manages a single A/B test.
+- `useABTest`: 获取 ABTest 管理器实例
+  ```typescript
+  const abTestManager = useABTest();
+  ```
 
-```tsx
-<ABTestContainer config={config} fallbackComponent={fallbackComponent}>
-  {children}
-</ABTestContainer>
-```
+## 类型定义
 
-Props:
-- `config`: ABTestConfig object
-- `fallbackComponent`: Component to render when experiment is not found
-- `children`: React nodes
+```typescript
+interface ABTestProviderProps {
+  children: React.ReactNode;
+  initialAllocations?: Record<string, Allocation>;
+}
 
-### ABTestSwitch
+interface ABTestContainerProps {
+  experimentId: string;
+  fallbackComponent?: React.ReactNode;
+  children: React.ReactNode;
+}
 
-Switch component that renders content based on experiment group.
-
-```tsx
-<ABTestSwitch name="group-name">
-  {children}
-</ABTestSwitch>
-```
-
-Props:
-- `name`: Name of the experiment group
-- `children`: React nodes to render when group matches
-
-### useABTest Hook
-
-Hook to access the A/B test manager directly.
-
-```tsx
-const abTestManager = useABTest();
-```
-
-Returns the ABTestManager instance from @abtest/core. 
+interface ABTestVariantProps {
+  variantId: string;
+  children?: React.ReactNode;
+}
+``` 

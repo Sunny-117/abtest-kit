@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ABTestProvider, ABTestContainer, ABTestVariant, useABTest } from '@abtest/react';
 import { mockAllocateExperiments } from '@abtest/core';
 
@@ -11,18 +11,26 @@ const NewFeature = () => <div>New Feature</div>;
 // 旧功能组件
 const OldFeature = () => <div>Old Feature</div>;
 
+// 实验组1组件
+const Variant1 = () => <div>Variant 1</div>;
+
+// 实验组2组件
+const Variant2 = () => <div>Variant 2</div>;
+
+// 实验组3组件
+const Variant3 = () => <div>Variant 3</div>;
+
 /**
  * 实验管理组件
- * 负责从服务器获取实验分配结果并更新到AB测试管理器中
  */
 const ExperimentManager = () => {
   const abTestManager = useABTest();
   const [loading, setLoading] = useState(true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const allocateExperiments = async () => {
       try {
-        // 定义要分配的实验配置
+        // 定义多个实验配置
         const experiments = [
           {
             id: 'feature-x',
@@ -33,13 +41,15 @@ const ExperimentManager = () => {
             id: 'feature-y',
             name: 'Feature Y Test',
             variants: ['new', 'old']
+          },
+          {
+            id: 'multi-variant',
+            name: 'Multi Variant Test',
+            variants: ['variant1', 'variant2', 'variant3']
           }
         ];
 
-        // 从服务器获取实验分配结果
         const allocations = await mockAllocateExperiments(experiments);
-        
-        // 将分配结果添加到AB测试管理器
         allocations.forEach(allocation => {
           abTestManager.addAllocation(allocation.experimentId, allocation);
         });
@@ -66,43 +76,56 @@ const ExperimentManager = () => {
       <div>
         Feature Y: {abTestManager.getAllocation('feature-y')?.variantId || 'not allocated'}
       </div>
+      <div>
+        Multi Variant: {abTestManager.getAllocation('multi-variant')?.variantId || 'not allocated'}
+      </div>
     </div>
   );
 };
 
 /**
- * 主应用组件
+ * 复杂实验示例
  */
-const App = () => {
+const ComplexExample = () => {
   return (
     <ABTestProvider>
       <div>
-        <h1>A/B Testing Example</h1>
+        <h1>Complex A/B Testing Example</h1>
         
-        <p>实验管理</p>
+        {/* 实验管理 */}
         <ExperimentManager />
 
-        <p>实验展示</p>
-        <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-          <ABTestVariant variantId="new">
-            <NewFeature />
-          </ABTestVariant>
-          <ABTestVariant variantId="old">
-            <OldFeature />
-          </ABTestVariant>
-        </ABTestContainer>
+        {/* 二选一实验 */}
+        <div>
+          <h3>Binary Choice Experiment</h3>
+          <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
+            <ABTestVariant variantId="new">
+              <NewFeature />
+            </ABTestVariant>
+            <ABTestVariant variantId="old">
+              <OldFeature />
+            </ABTestVariant>
+          </ABTestContainer>
+        </div>
 
-        <ABTestContainer experimentId="feature-y" fallbackComponent={<DefaultComponent />}>
-          <ABTestVariant variantId="new">
-            <NewFeature />
-          </ABTestVariant>
-          <ABTestVariant variantId="old">
-            <OldFeature />
-          </ABTestVariant>
-        </ABTestContainer>
+        {/* 多选实验 */}
+        <div>
+          <h3>Multi Variant Experiment</h3>
+          <ABTestContainer experimentId="multi-variant" fallbackComponent={<DefaultComponent />}>
+            <ABTestVariant variantId="variant1">
+              <Variant1 />
+            </ABTestVariant>
+            <ABTestVariant variantId="variant2">
+              <Variant2 />
+            </ABTestVariant>
+            <ABTestVariant variantId="variant3">
+              <Variant3 />
+            </ABTestVariant>
+          </ABTestContainer>
+        </div>
       </div>
     </ABTestProvider>
   );
 };
 
-export default App; 
+export default ComplexExample; 
