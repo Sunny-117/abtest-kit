@@ -62,6 +62,7 @@ export const ABTestContainer: React.FC<ABTestContainerProps> = ({
   children,
 }) => {
   const manager = useABTest();
+  console.log('运行get')
   const allocation = manager.getAllocation(experimentId);
 
   if (!allocation) {

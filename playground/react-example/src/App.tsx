@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { ABTestProvider, ABTestContainer, ABTestSwitch, useABTest } from '@abtest/react';
 import { mockAllocateExperiments } from '@abtest/core';
 
@@ -41,6 +41,7 @@ const ExperimentManager = () => {
         
         // 将分配结果添加到AB测试管理器
         allocations.forEach(allocation => {
+          console.log('运行add')
           abTestManager.addAllocation(allocation.experimentId, allocation);
         });
       } catch (error) {
