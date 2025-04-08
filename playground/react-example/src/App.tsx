@@ -41,7 +41,6 @@ const ExperimentManager = () => {
         
         // 将分配结果添加到AB测试管理器
         allocations.forEach(allocation => {
-          console.log('运行add')
           abTestManager.addAllocation(allocation.experimentId, allocation);
         });
       } catch (error) {
@@ -85,19 +84,19 @@ const App = () => {
 
         <p>实验展示</p>
         <ABTestContainer experimentId="feature-x" fallbackComponent={<DefaultComponent />}>
-          <ABTestSwitch variantId="new">
+          <ABTestSwitch experimentId="feature-x" variantId="new">
             <NewFeature />
           </ABTestSwitch>
-          <ABTestSwitch variantId="old">
+          <ABTestSwitch experimentId="feature-x" variantId="old">
             <OldFeature />
           </ABTestSwitch>
         </ABTestContainer>
 
         <ABTestContainer experimentId="feature-y" fallbackComponent={<DefaultComponent />}>
-          <ABTestSwitch variantId="new">
+          <ABTestSwitch experimentId="feature-y" variantId="new">
             <NewFeature />
           </ABTestSwitch>
-          <ABTestSwitch variantId="old">
+          <ABTestSwitch experimentId="feature-y" variantId="old">
             <OldFeature />
           </ABTestSwitch>
         </ABTestContainer>

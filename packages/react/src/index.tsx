@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ABTestManager, Allocation } from '@abtest/core';
 
 // 创建 ABTest 上下文
@@ -62,9 +62,27 @@ export const ABTestContainer: React.FC<ABTestContainerProps> = ({
   children,
 }) => {
   const manager = useABTest();
-  console.log('运行get')
-  const allocation = manager.getAllocation(experimentId);
+  const [isInitialized, setIsInitialized] = useState(manager.isInitializedState());
+  const [allocation, setAllocation] = useState<Allocation | undefined>(
+    manager.getAllocation(experimentId)
+  );
 
+  useEffect(() => {
+    const unsubscribe = manager.subscribe(() => {
+      setIsInitialized(manager.isInitializedState());
+      setAllocation(manager.getAllocation(experimentId));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [manager, experimentId]);
+  // 如果未初始化，显示加载状态
+  if (!isInitialized) {
+    return <div>Loading...</div>;
+  }
+
+  // 如果已初始化但没有分配结果，显示默认组件
   if (!allocation) {
     return <>{fallbackComponent}</>;
   }
@@ -78,6 +96,8 @@ export const ABTestContainer: React.FC<ABTestContainerProps> = ({
 interface ABTestVariantProps {
   // 变体ID
   variantId: string;
+  // 实验ID
+  experimentId: string;
   children?: React.ReactNode;
 }
 
@@ -85,11 +105,25 @@ interface ABTestVariantProps {
  * ABTest Variant
  * 根据变体ID显示对应的内容
  */
-export const ABTestSwitch: React.FC<ABTestVariantProps> = ({ variantId, children }) => {
+export const ABTestSwitch: React.FC<ABTestVariantProps> = ({ variantId, experimentId, children }) => {
   const manager = useABTest();
-  const allocation = manager.getAllocation(variantId);
+  const [isInitialized, setIsInitialized] = useState(manager.isInitializedState());
+  const [allocation, setAllocation] = useState<Allocation | undefined>(
+    manager.getAllocation(experimentId)
+  );
 
-  if (!allocation || allocation.variantId !== variantId) {
+  useEffect(() => {
+    const unsubscribe = manager.subscribe(() => {
+      setIsInitialized(manager.isInitializedState());
+      setAllocation(manager.getAllocation(experimentId));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [manager, experimentId]);
+
+  if (!isInitialized || !allocation || allocation.variantId !== variantId) {
     return null;
   }
 
