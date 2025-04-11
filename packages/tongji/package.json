@@ -10,10 +10,13 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --config ../../tsup.config.ts",
-    "dev": "tsup src/index.ts --config ../../tsup.config.ts --watch"
+    "dev": "tsup src/index.ts --config ../../tsup.config.ts --watch",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "3.1.1",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   }
-} 
+}

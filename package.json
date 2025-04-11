@@ -8,7 +8,8 @@
     "test": "pnpm -r test"
   },
   "devDependencies": {
+    "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "tsup": "^8.0.0"
+    "vitest": "^3.1.1"
   }
-} 
+}
