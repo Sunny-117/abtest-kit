@@ -26,8 +26,6 @@ function HooksDemoContent() {
 
   return (
     <div>
-      <h2>Hooks 方式 - 实验数据</h2>
-      
       <div>
         <h3>实验状态</h3>
         <p>加载状态: {pending ? '加载中' : '已就绪'}</p>

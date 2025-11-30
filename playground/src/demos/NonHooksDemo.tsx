@@ -17,35 +17,23 @@ const getUserId = () => {
 
 const globalABTestConfig = {
   themeColor: {
-    key: 'theme_color',
-    paramName: 'theme_color_test',
+    key: 'themeColor',
+    paramName: 'themeColor',
     groups: {
-      0: 33,
-      1: 33,
-      2: 34
-    }
-  },
-  cardStyle: {
-    key: 'card_style',
-    paramName: 'card_style_test',
-    groups: {
-      0: 50,
-      1: 50
+      0: 99,
+      1: 1,
     }
   },
   recommendAlgorithm: {
-    key: 'recommend_algorithm',
-    paramName: 'recommend_algorithm_test',
+    key: 'themeColor',
+    paramName: 'themeColor',
     groups: {
       0: 25,
       1: 25,
       2: 25,
-      3: 25
     },
     strategy: (groups: { [groupId: number]: number }) => {
-      const hour = new Date().getHours();
-      const groupIds = Object.keys(groups).map(Number);
-      return groupIds[hour % groupIds.length];
+      return 1;
     }
   }
 };
@@ -54,7 +42,6 @@ export default function NonHooksDemo() {
   const [userId] = useState(getUserId());
   const [strategy, setStrategy] = useState<'random' | 'crc32'>('random');
   const [testResults, setTestResults] = useState<Record<string, number>>({});
-  const [userstat, setUserstat] = useState('');
 
   const initTests = (strategyType: 'random' | 'crc32') => {
     const result = initGlobalABTest(globalABTestConfig, {
@@ -62,7 +49,6 @@ export default function NonHooksDemo() {
       userId: strategyType === 'crc32' ? userId : undefined
     });
     setTestResults(result);
-    setUserstat(getGlobalABTestUserstat());
   };
 
   useEffect(() => {
@@ -81,13 +67,10 @@ export default function NonHooksDemo() {
       userId: strategy === 'crc32' ? userId : undefined
     });
     setTestResults(result);
-    setUserstat(getGlobalABTestUserstat());
   };
 
   return (
     <div>
-      <h2>非 Hooks 方式 - 实验数据</h2>
-
       <div>
         <p>用户ID: {userId}</p>
         <p>
@@ -104,13 +87,12 @@ export default function NonHooksDemo() {
 
       <div>
         <h3>实验状态</h3>
-        <p>Userstat: {userstat || '未初始化'}</p>
+        <p>Userstat: {getGlobalABTestUserstat()}</p>
       </div>
 
       <div>
         <h3>实验分组数据</h3>
         <p>themeColor: 组 {testResults.themeColor ?? -1}</p>
-        <p>cardStyle: 组 {testResults.cardStyle ?? -1}</p>
         <p>recommendAlgorithm (自定义策略): 组 {testResults.recommendAlgorithm ?? -1}</p>
       </div>
 
