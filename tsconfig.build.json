@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "💡 重点是 \"types\": [],它阻止 TS 自动加载根目录下的任何全局类型（比如 eslint、webpack、node）。": "#",
+    "types": [],
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "dist",
+    "noEmit": false
+  },
+  "include": ["src"]
+}

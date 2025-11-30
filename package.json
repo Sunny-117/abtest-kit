@@ -1,15 +1,43 @@
 {
-  "name": "abtest",
-  "version": "1.0.0",
-  "private": true,
+  "name": "abtest-kit",
+  "version": "0.0.0",
+  "description": "Tongji A/B testing infrastructure.",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "pnpm -r build",
-    "dev": "pnpm -r dev",
-    "test": "pnpm -r test"
+    "dev": "concurrently \"robuild --watch\" \"cd playground && npm run dev\"",
+    "build": "robuild",
+    "build:dev": "robuild --watch",
+    "release": "npm run build && npm version patch && npm publish",
+    "test": "vitest --run"
+  },
+  "peerDependencies": {
+    "crc-32": "^1.2.2"
+  },
+  "peerDependenciesMeta": {
+    "crc-32": {
+      "optional": true
+    },
+    "react": {
+      "optional": true,
+      "version": ">=18.0.0"
+    },
+    "react-dom": {
+      "optional": true,
+      "version": ">=18.0.0"
+    }
   },
   "devDependencies": {
-    "tsup": "^8.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^3.1.1"
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "concurrently": "^9.2.1",
+    "robuild": "^0.0.17",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   }
 }
