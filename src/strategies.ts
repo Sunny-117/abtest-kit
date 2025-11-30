@@ -26,6 +26,7 @@ export const baiduTongjiStrategy: ABTestStrategy = {
 export const randomStrategy: ABTestStrategy = {
     name: 'random',
     getValue: async (): Promise<number> => {
+        // TODO: 分流只能是0/1，后续支持多种结果（follow globalABTest config）
         return Math.random() < 0.5 ? 0 : 1;
     }
 };
@@ -41,6 +42,7 @@ export const crc32Strategy: ABTestStrategy = {
         const crc32 = await import('crc-32');
         const hash = crc32.str(userId);
         const unsigned = hash >>> 0;
+        // TODO: 分流只能是0/1，后续支持多种结果（follow globalABTest config）
         return unsigned % 2; // 返回0或1
     }
 };
@@ -56,6 +58,6 @@ export const getStrategy = (strategyName: string): ABTestStrategy => {
             return crc32Strategy;
         default:
             console.warn(`Unknown strategy: ${strategyName}, falling back to baiduTongji`);
-            return baiduTongjiStrategy;
+            return randomStrategy;
     }
 };

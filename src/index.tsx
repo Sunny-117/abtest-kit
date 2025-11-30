@@ -31,8 +31,8 @@ const ABTestContext = createContext<ABTestContextType>({
  */
 export const initABTestsConfig = (
     abTestConfig: ABTestConfigMap,
+    options: ABTestOptions = {},
     injectScript?: () => void,
-    options: ABTestOptions = {}
 ): Promise<ABTestConfigMap> => {
     const { strategy = 'baiduTongji', userId } = options;
     const selectedStrategy = getStrategy(strategy);
@@ -47,7 +47,6 @@ export const initABTestsConfig = (
     if (strategy === 'baiduTongji') {
         window._hmt = window._hmt || [];
     }
-
     return new Promise(resolve => {
         const abTestPromises = Object.values(abTestConfig).map(config => {
             return new Promise<void>(promiseResolve => {
@@ -63,6 +62,7 @@ export const initABTestsConfig = (
 
                 // 使用选定的策略获取测试值
                 selectedStrategy.getValue(config, userId).then(value => {
+                    console.log({abTestConfig, c: config.paramName, value})
                     if (value !== undefined) {
                         abTestConfig[config.paramName].value = value;
                     }
@@ -101,7 +101,7 @@ export const ABTestProvider = ({
 
         initialized.current = true;
 
-        initABTestsConfig(abTestConfig, injectScript, options).then(finalConfig => {
+        initABTestsConfig(abTestConfig, options, injectScript).then(finalConfig => {
             const userstat = getUserstat(finalConfig);
             setState({
                 abTestConfig: finalConfig,

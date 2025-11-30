@@ -9,9 +9,9 @@
     "dist"
   ],
   "scripts": {
-    "dev": "concurrently \"robuild --watch\" \"cd playground && npm run dev\"",
     "build": "robuild",
-    "build:dev": "robuild --watch",
+    "dev": "robuild --watch",
+    "play": "pnpm --filter playground dev",
     "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
     "test": "vitest --run",
     "commit": "git-cz"
