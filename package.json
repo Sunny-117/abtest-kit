@@ -12,8 +12,9 @@
     "dev": "concurrently \"robuild --watch\" \"cd playground && npm run dev\"",
     "build": "robuild",
     "build:dev": "robuild --watch",
-    "release": "npm run build && npm run test && npm publish",
-    "test": "vitest --run"
+    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
+    "test": "vitest --run",
+    "commit": "git-cz"
   },
   "peerDependencies": {
     "crc-32": "^1.2.2"
@@ -35,7 +36,9 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "changelogen": "^0.6.2",
     "concurrently": "^9.2.1",
+    "git-cz": "^4.9.0",
     "robuild": "^0.0.17",
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
