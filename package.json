@@ -12,7 +12,7 @@
     "dev": "concurrently \"robuild --watch\" \"cd playground && npm run dev\"",
     "build": "robuild",
     "build:dev": "robuild --watch",
-    "release": "npm run build && npm version patch && npm publish",
+    "release": "npm run build && npm run test && npm publish",
     "test": "vitest --run"
   },
   "peerDependencies": {
