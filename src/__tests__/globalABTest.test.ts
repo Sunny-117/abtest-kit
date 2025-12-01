@@ -45,7 +45,6 @@ describe('ABTest SDK', () => {
   const mockConfig = {
     test1: {
       key: '1001',
-      paramName: 'test1',
       groups: {
         0: 50,
         1: 50
@@ -53,7 +52,6 @@ describe('ABTest SDK', () => {
     },
     test2: {
       key: '1002',
-      paramName: 'test2',
       groups: {
         0: 30,
         1: 70
@@ -290,13 +288,11 @@ describe('ABTest SDK', () => {
           // 使用全局策略的实验
           globalExperiment: {
             key: 'global_key',
-            paramName: 'global_param',
             groups: { 0: 50, 1: 50 }
           },
           // 使用单个实验策略的实验
           individualExperiment: {
             key: 'individual_key',
-            paramName: 'individual_param',
             groups: { 0: 50, 1: 50 },
             strategy: individualStrategy
           }

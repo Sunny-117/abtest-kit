@@ -67,7 +67,6 @@ function test50_50(): boolean {
   const config: { [testName: string]: GlobalABTestConfig } = {
     test50_50: {
       key: 'test_50_50',
-      paramName: 'test_50_50_param',
       groups: { 0: 50, 1: 50 }
     }
   };
@@ -108,7 +107,6 @@ function test20_80(): boolean {
   const config: { [testName: string]: GlobalABTestConfig } = {
     test20_80: {
       key: 'test_20_80',
-      paramName: 'test_20_80_param',
       groups: { 0: 20, 1: 80 }
     }
   };
@@ -149,7 +147,6 @@ function testMultiGroup(): boolean {
   const config: { [testName: string]: GlobalABTestConfig } = {
     testMulti: {
       key: 'test_multi',
-      paramName: 'test_multi_param',
       groups: { 0: 30, 1: 50, 2: 20 }
     }
   };
@@ -193,7 +190,6 @@ function testExtreme(): boolean {
   const config: { [testName: string]: GlobalABTestConfig } = {
     testExtreme: {
       key: 'test_extreme',
-      paramName: 'test_extreme_param',
       groups: { 0: 1, 1: 99 }
     }
   };
@@ -234,17 +230,14 @@ function testMultipleTests(): boolean {
   const config: { [testName: string]: GlobalABTestConfig } = {
     test1: {
       key: 'test1',
-      paramName: 'test1_param',
       groups: { 0: 50, 1: 50 }
     },
     test2: {
       key: 'test2',
-      paramName: 'test2_param',
       groups: { 0: 30, 1: 70 }
     },
     test3: {
       key: 'test3',
-      paramName: 'test3_param',
       groups: { 0: 20, 1: 80 }
     }
   };

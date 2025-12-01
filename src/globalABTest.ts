@@ -183,8 +183,8 @@ export const getGlobalABTestUserstat = (
     // 复用getUserstat的逻辑：按照configMap的顺序生成userstat字符串
     // 格式：key-value;key-value;...
     return Object.entries(globalConfigMapFromStorage)
-      .map(([_, config]) => {
-        const value = result[config.paramName] ?? -1;
+      .map(([testName, config]) => {
+        const value = result[testName] ?? -1;
         return `${config.key}-${Number(value)}`;
       })
       .join(';');

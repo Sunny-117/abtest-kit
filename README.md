@@ -36,13 +36,21 @@ import { ABTestProvider, useABTestValue } from 'abtest-kit';
 const abTestConfig = {
   featureA: {
     key: 'feature_a',
-    paramName: 'feature_a_test',
-    value: -1
+    value: -1,
+    groups: {
+      0: 50,  // 对照组 50%
+      1: 50   // 实验组 50%
+    },
+    strategy: 'random'
   },
   featureB: {
     key: 'feature_b',
-    paramName: 'feature_b_test',
-    value: -1
+    value: -1,
+    groups: {
+      0: 50,
+      1: 50
+    },
+    strategy: 'random'
   }
 };
 
@@ -192,7 +200,7 @@ export const baiduTongjiStrategy = {
     getValue: async (config) => {
         return new Promise(resolve => {
             window._hmt.push(['_fetchABTest', {
-                paramName: config.paramName,
+                paramName: config.key,
                 defaultValue: -1,
                 callback: function (value) {
                     resolve(value);
@@ -270,7 +278,6 @@ import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
 const globalABTestConfig = {
   cardRecommendation: {
     key: 'card_recommendation',
-    paramName: 'card_recommendation_test',
     groups: {
       0: 50,  // 对照组 50%
       1: 50   // 实验组 50%
@@ -278,7 +285,6 @@ const globalABTestConfig = {
   },
   newFeature: {
     key: 'new_feature',
-    paramName: 'new_feature_test',
     groups: {
       0: 50,  // 对照组 50%
       1: 50   // 实验组 50%
@@ -358,13 +364,11 @@ const globalABTestConfig = {
   // 使用全局策略的实验
   experimentA: {
     key: 'experiment_a',
-    paramName: 'experiment_a_test',
     groups: { 0: 50, 1: 50 }
   },
   // 使用单个实验自定义策略的实验
   experimentB: {
     key: 'experiment_b',
-    paramName: 'experiment_b_test',
     groups: { 0: 50, 1: 50 },
     // 这个策略只会应用于experimentB
     strategy: (groups) => {
@@ -376,7 +380,6 @@ const globalABTestConfig = {
   // 使用不同策略的另一个实验
   experimentC: {
     key: 'experiment_c',
-    paramName: 'experiment_c_test',
     groups: { 0: 50, 1: 50 },
     // 使用crc32策略（需要在全局选项中提供userId）
     strategy: 'crc32'
@@ -429,10 +432,9 @@ clearGlobalABTestCache();
 初始化全局分流。第一次调用时执行分流并保存到localStorage，后续调用直接返回缓存结果。
 
 **参数：**
-- `configMap`: 分流配置映射，key为测试名称，value为GlobalABTestConfig
+- `configMap`: 分流配置映射，key为测试名称（同时作为代码中的引用名），value为GlobalABTestConfig
   - 每个GlobalABTestConfig对象包含：
-    - `key`: 实验键名
-    - `paramName`: 实验参数名
+    - `key`: 实验上报ID（用于统计上报）
     - `groups`: 分组配置，{ groupId: 比例 }
     - `strategy`: （可选）单个实验的分流策略，'random'、'crc32'或自定义函数
 - `options`: 可选配置对象
@@ -507,7 +509,6 @@ window.$abtestUserstat = userstat;
   const globalABTestConfig = {
     cardRecommendation: {
       key: 'card_recommendation',
-      paramName: 'card_recommendation_test',
       groups: {
         0: 20,  // 对照组 20%
         1: 20,  // 实验组 20%

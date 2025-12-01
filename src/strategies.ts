@@ -12,7 +12,7 @@ export const baiduTongjiStrategy: ABTestStrategy = {
     getValue: async (config: ABTestConfig): Promise<number> => {
         return new Promise(resolve => {
             window._hmt.push(['_fetchABTest', {
-                paramName: config.paramName,
+                paramName: config.key,
                 defaultValue: -1,
                 callback: function (value: number) {
                     resolve(value);

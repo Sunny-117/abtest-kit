@@ -17,7 +17,6 @@ const getUserId = () => {
 const globalABTestConfig = {
   themeColor: {
     key: 'themeColor',
-    paramName: 'themeColor',
     groups: {
       0: 99,
       1: 1,
@@ -26,7 +25,6 @@ const globalABTestConfig = {
   },
   recommendAlgorithm: {
     key: 'recommendAlgorithm',
-    paramName: 'recommendAlgorithm',
     groups: {
       0: 25,
       1: 25,

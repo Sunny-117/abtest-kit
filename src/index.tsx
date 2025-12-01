@@ -45,13 +45,13 @@ export const initABTestsConfig = (
     }
 
     return new Promise(resolve => {
-        const abTestPromises = Object.values(abTestConfig).map(config => {
+        const abTestPromises = Object.entries(abTestConfig).map(([testName, config]) => {
             return new Promise<void>(promiseResolve => {
                 // 检查是否使用强制测试模式
                 if (location.href.includes(forceHitTestFlag)) {
-                    const forceValue = getExperimentHitStatus(abTestConfig)[config.paramName];
+                    const forceValue = getExperimentHitStatus(abTestConfig)[testName];
                     if (forceValue !== undefined) {
-                        abTestConfig[config.paramName].value = forceValue;
+                        abTestConfig[testName].value = forceValue;
                     }
                     promiseResolve();
                     return;
@@ -62,8 +62,8 @@ export const initABTestsConfig = (
                 
                 // 如果配置了groups，使用统一的策略解析逻辑
                 if (config.groups) {
-                    const value = resolveStrategyGroupId(strategy, config.groups, userId, config.paramName);
-                    abTestConfig[config.paramName].value = value;
+                    const value = resolveStrategyGroupId(strategy, config.groups, userId, testName);
+                    abTestConfig[testName].value = value;
                     promiseResolve();
                     return;
                 }
@@ -78,9 +78,9 @@ export const initABTestsConfig = (
 
                 // 使用选定的策略获取测试值
                 selectedStrategy.getValue(config, userId).then(value => {
-                    console.log({abTestConfig, c: config.paramName, value})
+                    console.log({abTestConfig, testName, value})
                     if (value !== undefined) {
-                        abTestConfig[config.paramName].value = value;
+                        abTestConfig[testName].value = value;
                     }
                     promiseResolve();
                 });

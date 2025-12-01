@@ -1,10 +1,16 @@
 import { ReactNode } from 'react';
 
+/**
+ * 自定义分流策略函数类型
+ */
+export type CustomStrategyFunction = (
+  groups: { [groupId: number]: number }
+) => number;
+
 export type StrategyType = 'baiduTongji' | 'random' | 'crc32' | CustomStrategyFunction;
 export type OmitStrategyType = Omit<StrategyType, 'baiduTongji'>
 export interface ABTestConfig {
     key: string;
-    paramName: string;
     value: number;
     groups?: {
         [groupId: number]: number; // groupId -> 分流比例 (0-100)
@@ -48,20 +54,11 @@ export interface ResolvedABTestConfig {
  */
 export interface GlobalABTestConfig {
     key: string;
-    paramName: string;
     groups: {
         [groupId: number]: number; // groupId -> 分流比例 (0-100)
     };
     strategy?: Omit<StrategyType, 'baiduTongji'>; // 单个实验的自定义分流策略（可选）
 }
-
-/**
- * 自定义分流策略函数类型
- */
-export type CustomStrategyFunction = (
-  groups: { [groupId: number]: number }
-) => number;
-
 
 /**
  * 全局分流选项

@@ -3,7 +3,6 @@ import { ABTestProvider, useABTest, useABTestValue } from 'abtest-kit';
 const abTestConfig = {
   buttonColor: {
     key: 'buttonColor',
-    paramName: 'buttonColor',
     value: -1,
     groups: {
       0: 50,
@@ -13,7 +12,6 @@ const abTestConfig = {
   },
   layoutStyle: {
     key: 'layoutStyle',
-    paramName: 'layoutStyle',
     value: -1,
     groups: {
       0: 33,
@@ -24,7 +22,6 @@ const abTestConfig = {
   },
   featureFlag: {
     key: 'featureFlag',
-    paramName: 'featureFlag',
     value: -1,
     groups: {
       0: 70,
