@@ -1,97 +1,10 @@
-/**
- * 全局分流配置
- */
-export interface GlobalABTestConfig {
-  key: string;
-  paramName: string;
-  groups: {
-    [groupId: number]: number; // groupId -> 分流比例 (0-100)
-  };
-  strategy?: 'random' | 'crc32' | CustomStrategyFunction; // 单个实验的自定义分流策略（可选）
-}
+import { GlobalABTestConfig, GlobalABTestOptions, GlobalABTestResult, GlobalConfig, StoredData } from "./types";
+import { resolveStrategyGroupId } from './resolveStrategy';
 
-/**
- * 自定义分流策略函数类型
- */
-export type CustomStrategyFunction = (
-  groups: { [groupId: number]: number }
-) => number;
-
-/**
- * 全局分流选项
- */
-export interface GlobalABTestOptions {
-  strategy?: 'random' | 'crc32' | CustomStrategyFunction; // 分流策略：random(默认)、crc32或自定义函数
-  userId?: string; // 用户ID，crc32策略必需
-  storageKey?: string; // localStorage存储键，默认'__global_abtest__'
-}
-
-/**
- * 全局分流结果
- */
-export interface GlobalABTestResult {
-  [testName: string]: number;
-}
-
-type GlobalConfig = { [testName: string]: GlobalABTestConfig }
 /**
  * 全局存储当前的分流配置，用于getGlobalABTestUserstat获取
  */
 let globalConfigMap: GlobalConfig = {};
-
-/**
- * 生成随机分流值
- * @param groups 分流配置，key为组ID，value为分流比例(0-100)
- * @returns 分流的组ID
- */
-const getRandomGroupId = (groups: { [groupId: number]: number }): number => {
-  const rand = Math.random() * 100;
-  let accumulated = 0;
-
-  for (const [groupId, ratio] of Object.entries(groups)) {
-    accumulated += ratio;
-    if (rand < accumulated) {
-      return Number(groupId);
-    }
-  }
-
-  // 如果没有匹配到（比例总和不足100），返回最后一个组
-  const lastGroupId = Math.max(...Object.keys(groups).map(Number));
-  return lastGroupId;
-};
-
-/**
- * 计算CRC32哈希值
- */
-const crc32Hash = (str: string): number => {
-  let crc = 0 ^ -1;
-  for (let i = 0; i < str.length; i++) {
-    crc = (crc >>> 8) ^ ((crc ^ str.charCodeAt(i)) & 0xff);
-  }
-  return (crc ^ -1) >>> 0;
-};
-
-/**
- * 基于CRC32的确定性分流
- * @param userId 用户ID
- * @param groups 分流配置
- * @returns 分流的组ID
- */
-const getCrc32GroupId = (userId: string, groups: { [groupId: number]: number }): number => {
-  const hash = crc32Hash(userId);
-  const rand = (hash % 100) / 100; // 转换为0-1之间的数
-  let accumulated = 0;
-
-  for (const [groupId, ratio] of Object.entries(groups)) {
-    accumulated += ratio / 100;
-    if (rand < accumulated) {
-      return Number(groupId);
-    }
-  }
-
-  const lastGroupId = Math.max(...Object.keys(groups).map(Number));
-  return lastGroupId;
-};
 
 /**
  * 计算配置的哈希值，用于检测配置变更
@@ -103,14 +16,6 @@ const getConfigHash = (config: { [groupId: number]: number }): string => {
   // 流量服务端存储比较复杂，所以这里牺牲一点
   return hashStr;
 };
-
-/**
- * 获取存储的分流结果和元数据
- */
-interface StoredData {
-  result: GlobalABTestResult;
-  configHashes?: { [testName: string]: string }; // 存储每个测试的配置哈希
-}
 
 const getStoredData = (storageKey: string): StoredData | null => {
   try {
@@ -197,36 +102,9 @@ export const initGlobalABTest = (
     }
 
     // 新增key或配置变更，需要重新分流
-    let groupId: number;
     // 优先使用单个实验的strategy，如果没有则使用全局strategy
     const currentStrategy = config.strategy !== undefined ? config.strategy : strategy;
-
-    if (currentStrategy === 'crc32') {
-      if (!userId) {
-        console.warn(`CRC32 strategy requires userId for test ${testName}`);
-        groupId = -1;
-      } else {
-        groupId = getCrc32GroupId(userId, config.groups);
-      }
-    } else if (typeof currentStrategy === 'function') {
-          // 使用自定义分流策略函数
-          try {
-            groupId = currentStrategy(config.groups);
-            // 验证返回值是否为有效的groupId
-            if (!(groupId in config.groups)) {
-              console.warn(`Custom strategy returned invalid groupId ${groupId} for test ${testName}`);
-              // 回退到随机策略
-              groupId = getRandomGroupId(config.groups);
-            }
-          } catch (error) {
-            console.warn(`Error executing custom strategy for test ${testName}:`, error);
-            // 出错时回退到随机策略
-            groupId = getRandomGroupId(config.groups);
-          }
-    } else {
-      // 默认使用random策略（随机分流）
-      groupId = getRandomGroupId(config.groups);
-    }
+    const groupId = resolveStrategyGroupId(currentStrategy, config.groups, userId, testName);
 
     result[testName] = groupId;
     newConfigHashes[testName] = currentConfigHash;

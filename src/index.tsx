@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { forceHitTestFlag, getExperimentHitStatus } from './forceHitTestFlag';
 import { getStrategy } from './strategies';
+import { resolveStrategyGroupId } from './resolveStrategy';
 import {
     ABTestConfigMap,
     ABTestContextType,
     ABTestOptions,
-    ABTestProviderProps
+    ABTestProviderProps,
 } from './types';
+
 
 // 获取所有AB测试的状态字符串
 export const getUserstat = (c: ABTestConfigMap): string => {
@@ -34,8 +36,7 @@ export const initABTestsConfig = (
     options: ABTestOptions = {},
     injectScript?: () => void,
 ): Promise<ABTestConfigMap> => {
-    const { strategy = 'baiduTongji', userId } = options;
-    const selectedStrategy = getStrategy(strategy);
+    const { userId } = options;
 
     try {
         injectScript?.();
@@ -43,10 +44,6 @@ export const initABTestsConfig = (
         console.log(error);
     }
 
-    // 确保_hmt已初始化（仅在使用百度统计策略时需要）
-    if (strategy === 'baiduTongji') {
-        window._hmt = window._hmt || [];
-    }
     return new Promise(resolve => {
         const abTestPromises = Object.values(abTestConfig).map(config => {
             return new Promise<void>(promiseResolve => {
@@ -58,6 +55,25 @@ export const initABTestsConfig = (
                     }
                     promiseResolve();
                     return;
+                }
+
+                // 使用配置中指定的策略，如果没有则使用默认策略
+                const strategy = config.strategy || 'baiduTongji';
+                
+                // 如果配置了groups，使用统一的策略解析逻辑
+                if (config.groups) {
+                    const value = resolveStrategyGroupId(strategy, config.groups, userId, config.paramName);
+                    abTestConfig[config.paramName].value = value;
+                    promiseResolve();
+                    return;
+                }
+                
+                // 否则使用旧的策略系统（baiduTongji等）
+                const selectedStrategy = getStrategy(strategy as 'baiduTongji' | 'random' | 'crc32');
+                
+                // 确保_hmt已初始化（仅在使用百度统计策略时需要）
+                if (strategy === 'baiduTongji') {
+                    window._hmt = window._hmt || [];
                 }
 
                 // 使用选定的策略获取测试值
@@ -142,8 +158,6 @@ export {
     getGlobalABTestValue,
     getGlobalABTestUserstat,
     clearGlobalABTestCache,
-    resetGlobalABTest,
-    type GlobalABTestConfig,
-    type GlobalABTestOptions,
-    type GlobalABTestResult
+    resetGlobalABTest
 } from './globalABTest';
+export * from './types';

@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import {
   initGlobalABTest,
   getGlobalABTestUserstat,
-  clearGlobalABTestCache,
   resetGlobalABTest
 } from 'abtest-kit';
 
 const getUserId = () => {
   let userId = localStorage.getItem('demo_user_id');
   if (!userId) {
-    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    userId = 'user_' + Math.random().toString(36).substring(2, 11);
     localStorage.setItem('demo_user_id', userId);
   }
   return userId;
@@ -22,17 +21,18 @@ const globalABTestConfig = {
     groups: {
       0: 99,
       1: 1,
-    }
+    },
+    strategy: 'random' as const
   },
   recommendAlgorithm: {
-    key: 'themeColor',
-    paramName: 'themeColor',
+    key: 'recommendAlgorithm',
+    paramName: 'recommendAlgorithm',
     groups: {
       0: 25,
       1: 25,
       2: 25,
     },
-    strategy: (groups: { [groupId: number]: number }) => {
+    strategy: () => {
       return 1;
     }
   }
@@ -40,31 +40,22 @@ const globalABTestConfig = {
 
 export default function NonHooksDemo() {
   const [userId] = useState(getUserId());
-  const [strategy, setStrategy] = useState<'random' | 'crc32'>('random');
   const [testResults, setTestResults] = useState<Record<string, number>>({});
 
-  const initTests = (strategyType: 'random' | 'crc32') => {
+  const initTests = () => {
     const result = initGlobalABTest(globalABTestConfig, {
-      strategy: strategyType,
-      userId: strategyType === 'crc32' ? userId : undefined
+      userId
     });
     setTestResults(result);
   };
 
   useEffect(() => {
-    initTests(strategy);
+    initTests();
   }, []);
-
-  const handleStrategyChange = (newStrategy: 'random' | 'crc32') => {
-    setStrategy(newStrategy);
-    clearGlobalABTestCache();
-    initTests(newStrategy);
-  };
 
   const handleReset = () => {
     const result = resetGlobalABTest(globalABTestConfig, {
-      strategy,
-      userId: strategy === 'crc32' ? userId : undefined
+      userId
     });
     setTestResults(result);
   };
@@ -73,15 +64,6 @@ export default function NonHooksDemo() {
     <div>
       <div>
         <p>用户ID: {userId}</p>
-        <p>
-          策略: 
-          <button onClick={() => handleStrategyChange('random')}>
-            Random {strategy === 'random' && '✓'}
-          </button>
-          <button onClick={() => handleStrategyChange('crc32')}>
-            CRC32 {strategy === 'crc32' && '✓'}
-          </button>
-        </p>
         <button onClick={handleReset}>重置</button>
       </div>
 
@@ -92,7 +74,7 @@ export default function NonHooksDemo() {
 
       <div>
         <h3>实验分组数据</h3>
-        <p>themeColor: 组 {testResults.themeColor ?? -1}</p>
+        <p>themeColor (random策略): 组 {testResults.themeColor ?? -1}</p>
         <p>recommendAlgorithm (自定义策略): 组 {testResults.recommendAlgorithm ?? -1}</p>
       </div>
 

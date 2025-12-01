@@ -4,17 +4,33 @@ const abTestConfig = {
   buttonColor: {
     key: 'buttonColor',
     paramName: 'buttonColor',
-    value: -1
+    value: -1,
+    groups: {
+      0: 50,
+      1: 50
+    },
+    strategy: 'random' as const
   },
   layoutStyle: {
     key: 'layoutStyle',
     paramName: 'layoutStyle',
-    value: -1
+    value: -1,
+    groups: {
+      0: 33,
+      1: 33,
+      2: 34
+    },
+    strategy: 'random' as const
   },
   featureFlag: {
     key: 'featureFlag',
     paramName: 'featureFlag',
-    value: -1
+    value: -1,
+    groups: {
+      0: 70,
+      1: 30
+    },
+    strategy: 'random' as const
   }
 };
 
@@ -51,7 +67,6 @@ export default function HooksDemo() {
   return (
     <ABTestProvider 
       abTestConfig={abTestConfig}
-      options={{ strategy: 'random' }}
     >
       <HooksDemoContent />
     </ABTestProvider>
