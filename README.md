@@ -408,8 +408,7 @@ const result = initGlobalABTest(globalABTestConfig, {
 });
 ```
 
-**优先级：**单个实验的策略会优先于全局策略。如果某个实验配置了自己的strategy，则会忽略全局strategy设置。
-```
+**优先级**：单个实验的策略会优先于全局策略。如果某个实验配置了自己的strategy，则会忽略全局strategy设置。
 
 **自定义策略注意事项：**
 - 返回值必须是groups对象中存在的groupId
