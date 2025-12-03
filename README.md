@@ -1,5 +1,6 @@
-# ABTest Kit 😯 [![npm](https://img.shields.io/npm/v/abtest-kit.svg)](https://npmjs.com/package/abtest-kit)
+# ABTest Kit
 
+[![Unit Test](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml)
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![bundle][bundle-src]][bundle-href]
@@ -8,7 +9,7 @@
 
 ## 简介
 
-轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成。
+🗃️ 轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成。
 
 **核心特性：**
 
