@@ -26,9 +26,6 @@
     "test:coverage": "vitest --run --coverage",
     "commit": "git-cz"
   },
-  "dependencies": {
-    "debug": "^4.4.3"
-  },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
