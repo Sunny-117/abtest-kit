@@ -324,12 +324,37 @@ describe('ABTest SDK', () => {
       expect(value).toBe(-1);
     });
 
+    it('should handle getGlobalABTestValue error', () => {
+      mockLocalStorage.getItem = vi.fn(() => {
+        throw new Error('Storage error');
+      });
+
+      const value = getGlobalABTestValue('test1');
+      expect(value).toBe(-1);
+
+      mockLocalStorage.getItem = vi.fn((key: string) => {
+        return mockLocalStorage.storage[key] || null;
+      });
+    });
+
     it('should clear AB test cache correctly', () => {
       initGlobalABTest(mockConfig, { storageKey: '__cache_test__' });
       expect(mockLocalStorage.getItem('__cache_test__')).not.toBeNull();
 
       clearGlobalABTestCache('__cache_test__');
       expect(mockLocalStorage.getItem('__cache_test__')).toBeNull();
+    });
+
+    it('should handle clearGlobalABTestCache error', () => {
+      mockLocalStorage.removeItem = vi.fn(() => {
+        throw new Error('Storage error');
+      });
+
+      expect(() => clearGlobalABTestCache()).not.toThrow();
+
+      mockLocalStorage.removeItem = vi.fn((key: string) => {
+        delete mockLocalStorage.storage[key];
+      });
     });
 
     it('should reset AB test correctly', () => {
@@ -354,6 +379,68 @@ describe('ABTest SDK', () => {
       const parts = userstat.split(';');
       expect(parts[0]).toBe(`1001-${result.test1}`);
       expect(parts[1]).toBe(`1002-${result.test2}`);
+    });
+
+    it('should return empty string when userstat storage is empty', () => {
+      clearGlobalABTestCache();
+      const userstat = getGlobalABTestUserstat();
+      expect(userstat).toBe('');
+    });
+
+    it('should handle getGlobalABTestUserstat error', () => {
+      initGlobalABTest(mockConfig);
+      
+      mockLocalStorage.getItem = vi.fn(() => {
+        throw new Error('Storage error');
+      });
+
+      const userstat = getGlobalABTestUserstat();
+      expect(userstat).toBe('');
+
+      mockLocalStorage.getItem = vi.fn((key: string) => {
+        return mockLocalStorage.storage[key] || null;
+      });
+    });
+
+    it('should handle legacy format data', () => {
+      // 模拟旧格式数据（直接是result对象）
+      const legacyData = { test1: 0, test2: 1 };
+      mockLocalStorage.setItem('__legacy_test__', JSON.stringify(legacyData));
+
+      const result = initGlobalABTest(mockConfig, { storageKey: '__legacy_test__' });
+      
+      // 旧格式数据会被识别并转换，但配置哈希不匹配会导致重新分流
+      expect([0, 1]).toContain(result.test1);
+      expect([0, 1]).toContain(result.test2);
+    });
+
+    it('should handle getStoredData error', () => {
+      mockLocalStorage.setItem('__error_test__', 'invalid json');
+      
+      // 应该能处理无效的JSON数据
+      const result = initGlobalABTest(mockConfig, { storageKey: '__error_test__' });
+      expect(result).toHaveProperty('test1');
+      expect(result).toHaveProperty('test2');
+    });
+
+    it('should handle saveData error', () => {
+      const originalSetItem = mockLocalStorage.setItem;
+      let callCount = 0;
+      mockLocalStorage.setItem = vi.fn((key: string, value: string) => {
+        callCount++;
+        // 第一次调用（保存config）成功，第二次调用（保存result）失败
+        if (callCount > 1) {
+          throw new Error('Storage full');
+        }
+        mockLocalStorage.storage[key] = value;
+      });
+
+      // 应该能处理存储错误
+      const result = initGlobalABTest(mockConfig, { storageKey: '__save_error__' });
+      expect(result).toHaveProperty('test1');
+      expect(result).toHaveProperty('test2');
+
+      mockLocalStorage.setItem = originalSetItem;
     });
   });
 });
