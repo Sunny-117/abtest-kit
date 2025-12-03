@@ -1,5 +1,5 @@
 <h1 align='center'>
-<samp>ABTest Kit</samp>
+<samp>ABTest Kit 🔧 <img src="https://img.shields.io/npm/v/abtest-kit?color=333&labelColor=555&style=flat-square" ></samp>
 </h1>
 
 
