@@ -7,73 +7,73 @@
 [![JSDocs][jsdocs-src]][jsdocs-href]
 [![License][license-src]][license-href]
 
-[简体中文](./README.zh-CN.md) | English
+[English](./README.en.md)
 
-## Introduction
+## 简介
 
-🗃️ Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with [robuild](https://github.com/Sunny-117/robuild), only 2.2 kb
+🗃️ 轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成，基于 [robuild](https://github.com/Sunny-117/robuild) 构建，仅 2.2 kb
 
-**Core Features:**
+**核心特性：**
 
-- 🚀 **Zero Dependencies Core**: Pure JavaScript implementation, works standalone
-- ⚛️ **Optional React Integration**: Provides Hooks and Context API
-- 🎯 **Multiple Splitting Strategies**: Random, CRC32, custom functions
-- 💾 **Persistent Storage**: localStorage-based result caching
-- 🔧 **Flexible Configuration**: Supports Baidu Analytics or fully custom
-- 📊 **Incremental Updates**: Smart config change detection and re-splitting
-- 🐛 **Debug Friendly**: URL parameter force hit, controllable logging
-- ✅ **High Test Coverage**: 100% core logic coverage, 94%+ overall coverage
+- 🚀 **无依赖核心**：纯 JavaScript 实现，可独立使用
+- ⚛️ **可选 React 集成**：提供 Hooks 和 Context API
+- 🎯 **多种分流策略**：Random、CRC32、自定义函数
+- 💾 **持久化存储**：基于 localStorage 的分流结果缓存
+- 🔧 **灵活配置**：支持百度统计或完全自定义
+- 📊 **增量更新**：智能的配置变更检测和重新分流
+- 🐛 **调试友好**：URL 参数强制命中、可控日志输出
+- ✅ **高测试覆盖率**：核心逻辑 100% 覆盖，整体 94%+ 覆盖率
 
-## Installation
+## 安装
 
 ```bash
 npm install abtest-kit
-# or
+# 或
 pnpm add abtest-kit
-# or
+# 或
 yarn add abtest-kit
 ```
 
-**Optional Dependencies:**
+**可选依赖：**
 
-- React 18+ (only required when using React integration)
+- React 18+ (仅在使用 React 集成时需要)
 
-## Quick Start
+## 快速开始
 
-### Method 1: Standalone Usage (No React Required)
+### 方式一：独立使用（无需 React）
 
-Suitable for any JavaScript project, perform traffic splitting on page load:
+适用于任何 JavaScript 项目，在页面加载时进行分流：
 
 ```javascript
 import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
 
-// Define splitting configuration
+// 定义分流配置
 const config = {
   newFeature: {
     key: 'new_feature',
     groups: {
-      0: 50,  // Control group 50%
-      1: 50   // Experiment group 50%
+      0: 50,  // 对照组 50%
+      1: 50   // 实验组 50%
     }
   }
 };
 
-// Initialize splitting (results are automatically cached to localStorage)
+// 初始化分流（结果会自动缓存到 localStorage）
 const result = initGlobalABTest(config);
 
-// Get splitting value anywhere
+// 在任何地方获取分流值
 const featureValue = getGlobalABTestValue('newFeature');
 
 if (featureValue === 1) {
-  // Show new feature
+  // 显示新功能
 } else {
-  // Show old feature
+  // 显示旧功能
 }
 ```
 
-### Method 2: React Integration
+### 方式二：React 集成
 
-Suitable for React applications, provides reactive splitting state:
+适用于 React 应用，提供响应式的分流状态：
 
 ```tsx
 import { ABTestProvider, useABTestValue } from 'abtest-kit';
@@ -100,19 +100,19 @@ function YourComponent() {
 
   return (
     <div>
-      {featureValue === 1 ? 'New Feature' : 'Old Feature'}
+      {featureValue === 1 ? '新功能' : '旧功能'}
     </div>
   );
 }
 ```
 
-## Core API
+## 核心 API
 
-### Standalone API
+### 独立使用 API
 
 #### `initGlobalABTest(config, options?)`
 
-Initialize global traffic splitting, results are cached to localStorage.
+初始化全局分流，结果会缓存到 localStorage。
 
 ```typescript
 const result = initGlobalABTest(
@@ -123,24 +123,24 @@ const result = initGlobalABTest(
     }
   },
   {
-    strategy: 'random',  // 'random' | 'crc32' | custom function
-    userId: 'user123',   // required for crc32 strategy
-    storageKey: '__abtest__'  // custom storage key
+    strategy: 'random',  // 'random' | 'crc32' | 自定义函数
+    userId: 'user123',   // crc32 策略需要
+    storageKey: '__abtest__'  // 自定义存储键
   }
 );
 ```
 
 #### `getGlobalABTestValue(testName, storageKey?)`
 
-Get the splitting value for a specific test.
+获取指定测试的分流值。
 
 ```typescript
-const value = getGlobalABTestValue('test1');  // Returns 0 or 1 or -1 (not initialized)
+const value = getGlobalABTestValue('test1');  // 返回 0 或 1 或 -1（未初始化）
 ```
 
 #### `getGlobalABTestUserstat(storageKey?)`
 
-Get the statistics string for all splitting results.
+获取所有分流结果的统计字符串。
 
 ```typescript
 const userstat = getGlobalABTestUserstat();  // "test_1-0;test_2-1"
@@ -148,7 +148,7 @@ const userstat = getGlobalABTestUserstat();  // "test_1-0;test_2-1"
 
 #### `resetGlobalABTest(config, options?)`
 
-Clear cache and re-split.
+清除缓存并重新分流。
 
 ```typescript
 const newResult = resetGlobalABTest(config);
@@ -158,14 +158,14 @@ const newResult = resetGlobalABTest(config);
 
 #### `<ABTestProvider>`
 
-React context provider.
+React 上下文提供者。
 
 ```tsx
 <ABTestProvider
   abTestConfig={config}
   options={{ userId: 'user123' }}
   injectScript={() => {
-    // Optional: inject Baidu Analytics script
+    // 可选：注入百度统计脚本
   }}
 >
   <App />
@@ -174,7 +174,7 @@ React context provider.
 
 #### `useABTest()`
 
-Get the complete AB test context.
+获取完整的 AB 测试上下文。
 
 ```tsx
 const { abTestConfig, pending, userstat } = useABTest();
@@ -182,26 +182,26 @@ const { abTestConfig, pending, userstat } = useABTest();
 
 #### `useABTestValue(testName)`
 
-Get the value for a specific test.
+获取特定测试的值。
 
 ```tsx
 const value = useABTestValue('test1');
 ```
 
 
-## Traffic Splitting Strategies
+## 分流策略
 
-### Random Strategy (Default)
+### Random 策略（默认）
 
-Completely random splitting, randomly assigned on each initialization.
+完全随机分流，每次初始化时随机分配。
 
 ```javascript
 initGlobalABTest(config, { strategy: 'random' });
 ```
 
-### CRC32 Strategy
+### CRC32 策略
 
-Deterministic splitting based on user ID, same user always assigned to same group.
+基于用户 ID 的确定性分流，同一用户始终分配到相同组。
 
 ```javascript
 initGlobalABTest(config, {
@@ -210,36 +210,36 @@ initGlobalABTest(config, {
 });
 ```
 
-### Custom Strategy
+### 自定义策略
 
-Pass a custom function to implement specific splitting logic.
+传入自定义函数实现特定分流逻辑。
 
 ```javascript
-// Global custom strategy
+// 全局自定义策略
 initGlobalABTest(config, {
   strategy: (groups) => {
-    // Time-based splitting
+    // 基于时间的分流
     const hour = new Date().getHours();
     return hour % 2 === 0 ? 0 : 1;
   }
 });
 
-// Per-experiment custom strategy
+// 单个实验自定义策略
 const config = {
   test1: {
     key: 'test1',
     groups: { 0: 50, 1: 50 },
     strategy: (groups) => {
-      // Only applies to this experiment
+      // 只对这个实验生效
       return Math.random() > 0.7 ? 1 : 0;
     }
   }
 };
 ```
 
-### Baidu Analytics Strategy
+### 百度统计策略
 
-Integration with Baidu Analytics A/B testing platform (requires React).
+与百度统计 A/B 测试平台集成（需要在 React 中使用）。
 
 ```tsx
 <ABTestProvider
@@ -262,61 +262,61 @@ Integration with Baidu Analytics A/B testing platform (requires React).
 
 
 
-## Data Flow
+## 数据流
 ![flow](./assets/flow.png)
 
-## Advanced Features
+## 高级功能
 
-### Global Splitting API
+### 全局分流 API
 
-The global splitting feature allows automatic traffic splitting early in page load, without depending on React and Provider. Splitting results are stored in localStorage and permanently retained once saved, ensuring user splitting consistency.
+全局分流功能允许在页面加载初期自动进行分流，无需依赖React和Provider。分流结果存储在localStorage中，一旦保存就永久保留，确保用户的分流一致性。
 
-**Core Features:**
-- ✅ No React dependency, pure JavaScript implementation
-- ✅ Executes splitting on first call, subsequent calls read from cache
-- ✅ Splitting results are permanently retained, users won't change groups on page refresh
-- ✅ Supports Random (default) and CRC32 strategies
-- ✅ Developers can actively re-split via resetGlobalABTest()
+**核心特性：**
+- ✅ 无React依赖，纯JavaScript实现
+- ✅ 第一次调用时执行分流，后续直接读取缓存
+- ✅ 分流结果永久保留，用户不会因为刷新页面而改变分流组
+- ✅ 支持Random（默认）和CRC32两种策略
+- ✅ 开发者可以通过resetGlobalABTest()主动重新分流
 
-#### Basic Usage
+#### 基本使用
 
 ```javascript
 import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
 
-// Define global splitting configuration
+// 定义全局分流配置
 const globalABTestConfig = {
   cardRecommendation: {
     key: 'card_recommendation',
     groups: {
-      0: 50,  // Control group 50%
-      1: 50   // Experiment group 50%
+      0: 50,  // 对照组 50%
+      1: 50   // 实验组 50%
     }
   },
   newFeature: {
     key: 'newFeature',
     groups: {
-      0: 50,  // Control group 50%
-      1: 50   // Experiment group 50%
+      0: 50,  // 对照组 50%
+      1: 50   // 实验组 50%
     },
-    // Custom splitting strategy for individual experiment (optional)
+    // 单个实验的自定义分流策略（可选）
     strategy: (groups) => {
-      // Date-based splitting example
+      // 基于日期的分流示例
       const day = new Date().getDate();
       return day % 2 === 0 ? 0 : 1;
     }
   }
 }
 
-// Initialize global splitting early in page load
+// 在页面加载初期初始化全局分流
 const result = initGlobalABTest(globalABTestConfig);
 console.log(result); // { cardRecommendation: 1, newFeature: 0 }
 
-// Get splitting value anywhere
+// 在任何地方获取分流值
 const cardTestValue = getGlobalABTestValue('cardRecommendation');
 console.log(cardTestValue); // 1
 ```
 
-#### Using CRC32 Strategy
+#### 使用CRC32策略
 
 ```javascript
 const result = initGlobalABTest(globalABTestConfig, {
@@ -325,10 +325,10 @@ const result = initGlobalABTest(globalABTestConfig, {
 });
 ```
 
-#### Using Custom Splitting Strategy
+#### 使用自定义分流策略
 
 ```javascript
-// Global custom strategy
+// 全局自定义策略
 const myCustomStrategy = (groups) => {
   const today = new Date().getDate();
   return today % 2 === 0 ? 0 : 1;
@@ -338,7 +338,7 @@ const result = initGlobalABTest(globalABTestConfig, {
   strategy: myCustomStrategy
 });
 
-// Per-experiment custom strategy
+// 单个实验自定义策略
 const globalABTestConfig = {
   experimentA: {
     key: 'experimentA',
@@ -355,48 +355,48 @@ const globalABTestConfig = {
 };
 ```
 
-#### Get Statistics String
+#### 获取统计字符串
 
 ```javascript
 import { getGlobalABTestUserstat } from 'abtest-kit';
 
-// Get userstat after initialization
+// 初始化后获取userstat
 const userstat = getGlobalABTestUserstat();
 // "card_recommendation-0;newFeature-1"
 
-// Report statistics
+// 上报统计
 window.$abtestUserstat = userstat;
 ```
 
-#### Reset Splitting
+#### 重置分流
 
 ```javascript
 import { resetGlobalABTest, clearGlobalABTestCache } from 'abtest-kit';
 
-// Clear cache and re-split
+// 清除缓存并重新分流
 const newResult = resetGlobalABTest(globalABTestConfig);
 
-// Or just clear cache
+// 或仅清除缓存
 clearGlobalABTestCache();
 ```
 
-## Important Notes
+## 注意事项
 
-1. React API's default splitting strategy is based on Baidu Analytics, ensure Baidu Analytics experiment splitting is properly configured before using the SDK
-2. Initialization is asynchronous, consider the `pending` state when using `useABTestValue`
-3. Global splitting uses localStorage, ensure browser supports localStorage
-4. Global splitting results are permanently retained once saved, unless actively calling `resetGlobalABTest()` or `clearGlobalABTestCache()`
-5. Configuration changes (including traffic ratio adjustments) will trigger re-splitting, modify configuration with caution
+1. React API 的默认分流策略是基于百度统计，所以确保在使用SDK前已正确配置百度统计实验分流
+2. 初始化是异步的，使用`useABTestValue`时需要考虑`pending`状态
+3. 全局分流使用localStorage存储，请确保浏览器支持localStorage
+4. 全局分流结果一旦保存就永久保留，除非主动调用 `resetGlobalABTest()` 或 `clearGlobalABTestCache()`
+5. 配置变更（包括流量比例调整）会导致重新分流，请谨慎修改配置
 
-## Best Practices
+## 最佳实践
 
-1. Centralize A/B test configuration management
-2. Use TypeScript to define configuration types
-3. Properly use forced test mode for development debugging
-4. Call global splitting early in page load to ensure consistency
-5. Use different storageKeys for different tests to avoid conflicts
+1. 将A/B测试配置集中管理
+2. 使用TypeScript定义配置类型
+3. 合理使用强制测试模式进行开发调试
+4. 全局分流应在页面加载初期调用，以确保分流的一致性
+5. 为不同的测试使用不同的storageKey，避免冲突
 
-# Additional Resources
+# 其他资料
 
 https://zhuanlan.zhihu.com/p/571901803
 
