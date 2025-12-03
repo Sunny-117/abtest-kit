@@ -4,7 +4,7 @@
 
 
 <p align='center'>
-  <samp>� Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with robuild, only 2.2 kb</samp>
+  <samp>🔧 Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with robuild, only 2.2 kb</samp>
 <br>
 <br>
 <!-- <a href='https://www.npmjs.com/package/abtest-kit'>
