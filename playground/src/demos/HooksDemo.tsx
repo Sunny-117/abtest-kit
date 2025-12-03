@@ -18,7 +18,7 @@ const abTestConfig: ABTestConfigMap = {
       1: 33,
       2: 34
     },
-    strategy: 'random' as const
+    strategy: 'crc32' as const,
   },
   featureFlag: {
     key: 'featureFlag',
@@ -61,9 +61,11 @@ function HooksDemoContent() {
 }
 
 export default function HooksDemo() {
+  const userId = '123';
   return (
     <ABTestProvider 
       abTestConfig={abTestConfig}
+      options={{userId}}
     >
       <HooksDemoContent />
     </ABTestProvider>

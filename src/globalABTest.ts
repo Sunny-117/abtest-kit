@@ -1,10 +1,10 @@
-import { GlobalABTestOptions, GlobalABTestResult, GlobalConfig, StoredData } from "./types";
+import { GlobalABTestOptions, GlobalABTestResult, GlobalABTestConfig, StoredData } from "./types";
 import { resolveStrategyGroupId } from './resolveStrategy';
 
 /**
  * 全局存储当前的分流配置，用于getGlobalABTestUserstat获取
  */
-let globalConfigMap: GlobalConfig = {};
+let globalConfigMap: GlobalABTestConfig = {};
 
 /**
  * 计算配置的哈希值，用于检测配置变更
@@ -67,7 +67,7 @@ const saveData = (
  * @returns 分流结果
  */
 export const initGlobalABTest = (
-  configMap: GlobalConfig,
+  configMap: GlobalABTestConfig,
   options: GlobalABTestOptions = {}
 ): GlobalABTestResult => {
   const {
@@ -155,7 +155,7 @@ export const clearGlobalABTestCache = (storageKey: string = '__global_abtest__')
  * @returns 新的分流结果
  */
 export const resetGlobalABTest = (
-  configMap: GlobalConfig,
+  configMap: GlobalABTestConfig,
   options: GlobalABTestOptions = {}
 ): GlobalABTestResult => {
   const { storageKey = '__global_abtest__' } = options;
@@ -179,7 +179,7 @@ export const getGlobalABTestUserstat = (
 
     const data = JSON.parse(stored);
     const result = data?.result || {};
-    const globalConfigMapFromStorage = JSON.parse(localStorage.getItem(storageKey + '__config__') || '{}') as GlobalConfig;
+    const globalConfigMapFromStorage = JSON.parse(localStorage.getItem(storageKey + '__config__') || '{}') as GlobalABTestConfig;
     // 复用getUserstat的逻辑：按照configMap的顺序生成userstat字符串
     // 格式：key-value;key-value;...
     return Object.entries(globalConfigMapFromStorage)

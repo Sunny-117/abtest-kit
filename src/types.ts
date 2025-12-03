@@ -50,17 +50,6 @@ export interface ResolvedABTestConfig {
 }
 
 /**
- * 全局分流配置
- */
-export interface GlobalABTestConfig {
-    key: string;
-    groups: {
-        [groupId: number]: number; // groupId -> 分流比例 (0-100)
-    };
-    strategy?: Omit<StrategyType, 'baiduTongji'>; // 单个实验的自定义分流策略（可选）
-}
-
-/**
  * 全局分流选项
  */
 export interface GlobalABTestOptions {
@@ -76,8 +65,13 @@ export interface GlobalABTestResult {
     [testName: string]: number;
 }
 
+export type GlobalABTestConfig = {
+    [k: string]: Omit<ABTestConfig, 'value' | 'groups' | 'strategy'> & {
+        groups: { [groupId: number]: number };
+        strategy?: Omit<StrategyType, 'baiduTongji'>;
+    };
+};
 
-export type GlobalConfig = { [testName: string]: GlobalABTestConfig }
 
 
 /**

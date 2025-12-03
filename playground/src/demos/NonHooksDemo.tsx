@@ -3,7 +3,7 @@ import {
   initGlobalABTest,
   getGlobalABTestUserstat,
   resetGlobalABTest,
-  type GlobalConfig
+  type GlobalABTestConfig
 } from 'abtest-kit';
 
 const getUserId = () => {
@@ -15,7 +15,7 @@ const getUserId = () => {
   return userId;
 };
 
-const globalABTestConfig: GlobalConfig = {
+const globalABTestConfig: GlobalABTestConfig = {
   themeColor: {
     key: 'themeColor',
     groups: {
@@ -32,7 +32,8 @@ const globalABTestConfig: GlobalConfig = {
       2: 25,
     },
     strategy: () => {
-      return 1;
+      const userId = getUserId();
+      return userId.charAt(3) === 'a' ? 1 : 0;
     }
   }
 };
@@ -74,7 +75,7 @@ export default function NonHooksDemo() {
       <div>
         <h3>实验分组数据</h3>
         <p>themeColor (random策略): 组 {testResults.themeColor ?? -1}</p>
-        <p>recommendAlgorithm (自定义策略): 组 {testResults.recommendAlgorithm ?? -1}</p>
+        <p>recommendAlgorithm (自定义策略 by userId): 组 {testResults.recommendAlgorithm ?? -1}</p>
       </div>
 
       <div>
