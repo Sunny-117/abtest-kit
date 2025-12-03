@@ -263,9 +263,9 @@ const config = {
 ## 数据流
 ![flow](./assets/flow.png)
 
-## 6. 全局分流（无React依赖）
+## 高级功能
 
-### 6.1 概述
+### 全局分流 API
 
 全局分流功能允许在页面加载初期自动进行分流，无需依赖React和Provider。分流结果存储在localStorage中，一旦保存就永久保留，确保用户的分流一致性。
 
@@ -276,15 +276,7 @@ const config = {
 - ✅ 支持Random（默认）和CRC32两种策略
 - ✅ 开发者可以通过resetGlobalABTest()主动重新分流
 
-### 6.2 使用场景
-
-- 页面加载初期的自动分流
-- 不依赖React的纯JavaScript环境
-- 需要确定性分流的场景
-- 需要跨页面保持分流一致性
-- 用户不应该因为刷新页面而改变分流组
-
-### 6.3 基本使用
+#### 基本使用
 
 ```javascript
 import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
@@ -299,7 +291,7 @@ const globalABTestConfig = {
     }
   },
   newFeature: {
-    key: 'new_feature',
+    key: 'newFeature',
     groups: {
       0: 50,  // 对照组 50%
       1: 50   // 实验组 50%
@@ -314,22 +306,15 @@ const globalABTestConfig = {
 }
 
 // 在页面加载初期初始化全局分流
-// 第一次调用时随机分流，之后从localStorage读取
 const result = initGlobalABTest(globalABTestConfig);
 console.log(result); // { cardRecommendation: 1, newFeature: 0 }
 
 // 在任何地方获取分流值
 const cardTestValue = getGlobalABTestValue('cardRecommendation');
 console.log(cardTestValue); // 1
-
-// 后续调用initGlobalABTest会直接返回缓存结果
-const result2 = initGlobalABTest(globalABTestConfig);
-console.log(result2); // { cardRecommendation: 1, newFeature: 0 } (与第一次相同)
 ```
 
-### 6.4 高级用法
-
-#### 使用CRC32策略（基于用户ID的确定性分流）
+#### 使用CRC32策略
 
 ```javascript
 const result = initGlobalABTest(globalABTestConfig, {
@@ -340,91 +325,45 @@ const result = initGlobalABTest(globalABTestConfig, {
 
 #### 使用自定义分流策略
 
-自定义分流策略允许您实现特定的分流逻辑，支持全局策略和单个实验策略两种方式。
-
-**全局自定义策略（应用于所有实验）：**
-
 ```javascript
-// 定义自定义分流策略函数
+// 全局自定义策略
 const myCustomStrategy = (groups) => {
-  console.log('Available groups:', groups);
-  
-  // 示例1：基于日期的分流（每天切换一次）
   const today = new Date().getDate();
   return today % 2 === 0 ? 0 : 1;
-  
-  // 示例2：使用随机数实现自定义分配
-  // const random = Math.random() * 100;
-  // let accumulated = 0;
-  // for (const [groupId, ratio] of Object.entries(groups)) {
-  //   accumulated += ratio;
-  //   if (random < accumulated) {
-  //     return Number(groupId);
-  //   }
-  // }
-  // return Object.keys(groups)[0]; // 默认返回第一个组
 };
 
-// 使用全局自定义策略
 const result = initGlobalABTest(globalABTestConfig, {
   strategy: myCustomStrategy
 });
-```
 
-**单个实验自定义策略（只应用于特定实验）：**
-
-```javascript
-// 定义全局分流配置，为特定实验添加自定义策略
+// 单个实验自定义策略
 const globalABTestConfig = {
-  // 使用全局策略的实验
   experimentA: {
-    key: 'experiment_a',
+    key: 'experimentA',
     groups: { 0: 50, 1: 50 }
   },
-  // 使用单个实验自定义策略的实验
   experimentB: {
-    key: 'experiment_b',
+    key: 'experimentB',
     groups: { 0: 50, 1: 50 },
-    // 这个策略只会应用于experimentB
     strategy: (groups) => {
-      // 示例：基于当前小时的分流
       const hour = new Date().getHours();
       return hour % 2 === 0 ? 0 : 1;
     }
-  },
-  // 使用不同策略的另一个实验
-  experimentC: {
-    key: 'experiment_c',
-    groups: { 0: 50, 1: 50 },
-    // 使用crc32策略（需要在全局选项中提供userId）
-    strategy: 'crc32'
   }
 };
-
-// 初始化时可以设置全局策略
-const result = initGlobalABTest(globalABTestConfig, {
-  strategy: 'random', // 全局默认策略
-  userId: 'user_123456' // 用于crc32策略
-});
 ```
 
-**优先级**：单个实验的策略会优先于全局策略。如果某个实验配置了自己的strategy，则会忽略全局strategy设置。
-
-**自定义策略注意事项：**
-- 返回值必须是groups对象中存在的groupId
-- 如果返回无效的groupId或函数执行出错，将自动回退到随机策略
-- 单个实验的策略会优先于全局策略
-- 为实验配置strategy属性可以实现更灵活的分流控制
-
-#### 自定义存储键
+#### 获取统计字符串
 
 ```javascript
-const result = initGlobalABTest(globalABTestConfig, {
-  storageKey: 'my_custom_abtest_key'
-});
+import { getGlobalABTestUserstat } from 'abtest-kit';
 
-// 获取时也需要指定相同的键
-const value = getGlobalABTestValue('cardRecommendation', 'my_custom_abtest_key');
+// 初始化后获取userstat
+const userstat = getGlobalABTestUserstat();
+// "card_recommendation-0;newFeature-1"
+
+// 上报统计
+window.$abtestUserstat = userstat;
 ```
 
 #### 重置分流
@@ -432,142 +371,25 @@ const value = getGlobalABTestValue('cardRecommendation', 'my_custom_abtest_key')
 ```javascript
 import { resetGlobalABTest, clearGlobalABTestCache } from 'abtest-kit';
 
-// 清除缓存并重新分流（比如用户登出/登入时）
+// 清除缓存并重新分流
 const newResult = resetGlobalABTest(globalABTestConfig);
 
 // 或仅清除缓存
 clearGlobalABTestCache();
 ```
 
-### 6.5 API 参考
+## 注意事项
 
-#### `initGlobalABTest(configMap, options?)`
-
-初始化全局分流。第一次调用时执行分流并保存到localStorage，后续调用直接返回缓存结果。
-
-**参数：**
-- `configMap`: 分流配置映射，key为测试名称（同时作为代码中的引用名），value为GlobalABTestConfig
-  - 每个GlobalABTestConfig对象包含：
-    - `key`: 实验上报ID（用于统计上报）
-    - `groups`: 分组配置，{ groupId: 比例 }
-    - `strategy`: （可选）单个实验的分流策略，'random'、'crc32'或自定义函数
-- `options`: 可选配置对象
-  - `strategy`: 全局分流策略，'random'（默认）、'crc32'或自定义函数
-  - `userId`: 用户ID，crc32策略必需
-  - `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
-
-**自定义策略函数格式：**
-```typescript
-(groups: { [groupId: number]: number }) => number;
-```
-
-**返回值：** GlobalABTestResult 对象，包含每个测试的分流值
-
-#### `getGlobalABTestValue(testName, storageKey?)`
-
-获取指定测试的分流值。
-
-**参数：**
-- `testName`: 测试名称
-- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
-
-**返回值：** 分流值，如果未初始化则返回-1
-
-#### `getGlobalABTestUserstat(storageKey?)` ⭐ 新增
-
-获取所有分流结果的userstat字符串，格式与 `useABTest` 的 `userstat` 一致。
-
-**参数：**
-- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
-
-**返回值：** 格式化的分流结果字符串，格式为 `key-value;key-value;...`
-
-**说明：**
-- 复用 `getUserstat` 的逻辑处理格式
-- 不需要传递configMap参数，自动使用initGlobalABTest时保存的配置
-- 如果未初始化则返回空字符串
-
-**示例：**
-```javascript
-// 初始化
-initGlobalABTest(globalABTestConfig);
-
-// 获取userstat
-const userstat = getGlobalABTestUserstat();
-// "card_recommendation-0;new_feature-1"
-
-// 上报统计
-window.$abtestUserstat = userstat;
-```
-
-#### `clearGlobalABTestCache(storageKey?)`
-
-清除全局分流缓存。
-
-**参数：**
-- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
-
-#### `resetGlobalABTest(configMap, options?)`
-
-重置全局分流（清除缓存并重新分流）。
-
-**参数：** 同 `initGlobalABTest`
-
-**返回值：** 新的分流结果
-
-### 6.6 完整示例
-
-```javascript
-// 在页面加载初期（如在HTML中的内联脚本）
-<script>
-  const globalABTestConfig = {
-    cardRecommendation: {
-      key: 'card_recommendation',
-      groups: {
-        0: 20,  // 对照组 20%
-        1: 20,  // 实验组 20%
-        '-1': 60 // 空闲组 60%
-      }
-    }
-  };
-
-  // 导入SDK并初始化
-  import { initGlobalABTest } from 'abtest-kit';
-
-  const result = initGlobalABTest(globalABTestConfig);
-  window.userRecommendationTest = result.cardRecommendation;
-</script>
-
-// 在React组件中使用
-import { getGlobalABTestValue } from 'abtest-kit';
-
-function MyComponent() {
-  const testValue = getGlobalABTestValue('cardRecommendation');
-
-  return (
-    <div>
-      {testValue === 0 && <p>对照组内容</p>}
-      {testValue === 1 && <p>实验组内容</p>}
-      {testValue === -1 && <p>空闲组内容</p>}
-    </div>
-  );
-}
-```
-
-## 7. 注意事项
-
-1. 默认分流策略下，确保在使用SDK前已正确配置百度统计
+1. React API 的默认分流策略是基于百度统计，所以确保在使用SDK前已正确配置百度统计实验分流
 2. 初始化是异步的，使用`useABTestValue`时需要考虑`pending`状态
-3. 强制命中实验模式仅用于开发调试，不要在生产环境使用
 4. 全局分流使用localStorage存储，请确保浏览器支持localStorage
 5. 全局分流结果一旦保存就永久保留，除非主动调用 `resetGlobalABTest()` 或 `clearGlobalABTestCache()`
 6. 配置变更（包括流量比例调整）会导致重新分流，请谨慎修改配置
 
-## 8. 最佳实践
+## 最佳实践
 
 1. 将A/B测试配置集中管理
 2. 使用TypeScript定义配置类型
-3. 在关键功能点添加错误处理
 4. 合理使用强制测试模式进行开发调试
 5. 全局分流应在页面加载初期调用，以确保分流的一致性
 6. 为不同的测试使用不同的storageKey，避免冲突
