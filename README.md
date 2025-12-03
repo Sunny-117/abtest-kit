@@ -1,4 +1,16 @@
-# ABTest Kit
+<h1 align='center'>
+<samp>ABTest Kit</samp>
+</h1>
+
+
+<p align='center'>
+  <samp>🗃️ Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with robuild, only 2.2 kb</samp>
+<br>
+<br>
+<a href='https://www.npmjs.com/package/abtest-kit'>
+<img src='https://img.shields.io/npm/v/abtest-kit?color=333&labelColor=555&style=flat-square' alt='version'/>
+</a>
+</p>
 
 [![Unit Test](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml)
 [![npm version][npm-version-src]][npm-version-href]
@@ -10,8 +22,6 @@
 [简体中文](./README.zh-CN.md) | English
 
 ## Introduction
-
-🗃️ Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with [robuild](https://github.com/Sunny-117/robuild), only 2.2 kb
 
 **Core Features:**
 
