@@ -1,11 +1,12 @@
 import { GlobalABTestOptions, GlobalABTestResult, GlobalABTestConfig, StoredData } from "./types";
 import { resolveStrategyGroupId } from './resolveStrategy';
 import { CONFIG_SUFFIX, DEFAULT_STORAGE_KEY } from "./constant";
+import { logger } from './logger';
 
 /**
  * 全局存储当前的分流配置，用于getGlobalABTestUserstat获取
  */
-let globalConfigMap: GlobalABTestConfig = {};
+let globalABTestConfigMap: GlobalABTestConfig = {};
 
 /**
  * 计算配置的哈希值，用于检测配置变更
@@ -32,7 +33,7 @@ const getStoredData = (storageKey: string): StoredData | null => {
 
     return data || null;
   } catch (error) {
-    console.warn(`Failed to get stored AB test result from ${storageKey}:`, error);
+    logger.warn(`Failed to get stored AB test result from ${storageKey}`, error);
     return null;
   }
 };
@@ -52,7 +53,7 @@ const saveData = (
     };
     localStorage.setItem(storageKey, JSON.stringify(data));
   } catch (error) {
-    console.warn(`Failed to save AB test result to ${storageKey}:`, error);
+    logger.warn(`Failed to save AB test result to ${storageKey}`, error);
   }
 };
 
@@ -78,8 +79,8 @@ export const initGlobalABTest = (
   } = options;
 
   // 保存配置到全局变量，用于getGlobalABTestUserstat获取
-  globalConfigMap = configMap;
-  localStorage.setItem(storageKey + CONFIG_SUFFIX, JSON.stringify(globalConfigMap));
+  globalABTestConfigMap = configMap;
+  localStorage.setItem(storageKey + CONFIG_SUFFIX, JSON.stringify(globalABTestConfigMap));
 
   // 获取存储的数据
   const storedData = getStoredData(storageKey);
@@ -132,7 +133,7 @@ export const getGlobalABTestValue = (testName: string, storageKey: string = DEFA
     const data = JSON.parse(stored);
     return data?.result?.[testName] ?? -1;
   } catch (error) {
-    console.warn(`Failed to get AB test value for ${testName}:`, error);
+    logger.warn(`Failed to get AB test value for ${testName}`, error);
     return -1;
   }
 };
@@ -145,7 +146,7 @@ export const clearGlobalABTestCache = (storageKey: string = DEFAULT_STORAGE_KEY)
   try {
     localStorage.removeItem(storageKey);
   } catch (error) {
-    console.warn(`Failed to clear AB test cache:`, error);
+    logger.warn('Failed to clear AB test cache', error);
   }
 };
 
@@ -190,7 +191,7 @@ export const getGlobalABTestUserstat = (
       })
       .join(';');
   } catch (error) {
-    console.warn(`Failed to get global AB test userstat:`, error);
+    logger.warn('Failed to get global AB test userstat', error);
     return '';
   }
 };

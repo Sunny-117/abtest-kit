@@ -162,9 +162,10 @@ describe('ABTest SDK', () => {
         // 故意不提供userId
       });
 
-      // 验证输出警告
+      // 验证输出警告（新的日志格式包含前缀和级别）
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('CRC32 strategy requires userId')
+        expect.stringContaining('CRC32 strategy requires userId'),
+        expect.anything()
       );
 
       // 验证返回-1
@@ -219,9 +220,10 @@ describe('ABTest SDK', () => {
         strategy: invalidStrategy
       });
 
-      // 验证输出警告
+      // 验证输出警告（新的日志格式包含前缀和级别）
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Custom strategy returned invalid groupId')
+        expect.stringContaining('Custom strategy returned invalid groupId'),
+        expect.anything()
       );
 
       // 验证结果是有效的groupId

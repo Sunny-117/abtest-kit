@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { forceHitTestFlag, getExperimentHitStatus } from './forceHitTestFlag';
 import { getStrategy } from './strategies';
 import { resolveStrategyGroupId } from './resolveStrategy';
+import { logger } from './logger';
 import {
     ABTestConfigMap,
     ABTestContextType,
@@ -41,7 +42,7 @@ export const initABTestsConfig = (
     try {
         injectScript?.();
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to inject script', error);
     }
 
     return new Promise(resolve => {
@@ -78,7 +79,7 @@ export const initABTestsConfig = (
 
                 // 使用选定的策略获取测试值
                 selectedStrategy.getValue(config, userId).then(value => {
-                    console.log({abTestConfig, testName, value})
+                    logger.debug(`AB test resolved: ${testName}`, { testName, value });
                     if (value !== undefined) {
                         abTestConfig[testName].value = value;
                     }
@@ -126,7 +127,7 @@ export const ABTestProvider = ({
             });
             window.$abtestUserstat = userstat;
         }).catch(error => {
-            console.error('AB测试初始化失败:', error);
+            logger.error('AB测试初始化失败', error);
         });
     }, []);
 
@@ -160,4 +161,5 @@ export {
     clearGlobalABTestCache,
     resetGlobalABTest
 } from './globalABTest';
+
 export * from './types';

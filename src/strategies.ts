@@ -1,4 +1,5 @@
 import { ABTestConfig, ABTestStrategy } from './types';
+import { logger } from './logger';
 
 declare global {
     interface Window {
@@ -36,7 +37,7 @@ export const crc32Strategy: ABTestStrategy = {
     name: 'crc32',
     getValue: async (_config: ABTestConfig, userId?: string): Promise<number> => {
         if (!userId) {
-            console.warn('CRC32 strategy requires userId');
+            logger.warn('CRC32 strategy requires userId');
             return -1;
         }
         const crc32 = await import('crc-32');
@@ -57,7 +58,7 @@ export const getStrategy = (strategyName: string): ABTestStrategy => {
         case 'crc32':
             return crc32Strategy;
         default:
-            console.warn(`Unknown strategy: ${strategyName}, falling back to baiduTongji`);
+            logger.warn(`Unknown strategy: ${strategyName}, falling back to baiduTongji`);
             return randomStrategy;
     }
 };

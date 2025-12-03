@@ -1,4 +1,5 @@
 import { OmitStrategyType, StrategyType } from './types';
+import { logger } from './logger';
 
 /**
  * 生成随机分流值
@@ -72,7 +73,7 @@ export const resolveStrategyGroupId = (
 
   if (currentStrategy === 'crc32') {
     if (!userId) {
-      console.warn(`CRC32 strategy requires userId for test ${testName || 'unknown'}`);
+      logger.warn(`CRC32 strategy requires userId for test ${testName || 'unknown'}`);
       return -1;
     }
     return getCrc32GroupId(userId, groups);
@@ -82,13 +83,13 @@ export const resolveStrategyGroupId = (
       const groupId = currentStrategy(groups);
       // 验证返回值是否为有效的groupId
       if (!(groupId in groups)) {
-        console.warn(`Custom strategy returned invalid groupId ${groupId} for test ${testName || 'unknown'}`);
+        logger.warn(`Custom strategy returned invalid groupId ${groupId} for test ${testName || 'unknown'}`);
         // 回退到随机策略
         return getRandomGroupId(groups);
       }
       return groupId;
     } catch (error) {
-      console.warn(`Error executing custom strategy for test ${testName || 'unknown'}:`, error);
+      logger.warn(`Error executing custom strategy for test ${testName || 'unknown'}`, error);
       // 出错时回退到随机策略
       return getRandomGroupId(groups);
     }
