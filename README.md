@@ -1,252 +1,265 @@
-# ABTest SDK 使用文档
+# ABTest Kit 😯 [![npm](https://img.shields.io/npm/v/abtest-kit.svg)](https://npmjs.com/package/abtest-kit)
 
-## 1. 简介
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![bundle][bundle-src]][bundle-href]
+[![JSDocs][jsdocs-src]][jsdocs-href]
+[![License][license-src]][license-href]
 
-基于百度统计（Tongji）A/B测试的React SDK【支持自定义分流策略】，提供了简单易用的A/B测试功能集成。该SDK支持与百度统计无缝集成，并提供了强制命中实验模式用于调试。
+## 简介
 
-- 通过hooks API获取实验值
-- 自动订阅Context状态变化
-- 实验值变化会触发组件重新渲染
+轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成。
 
-## 2. 安装
+**核心特性：**
+
+- 🚀 **无依赖核心**：纯 JavaScript 实现，可独立使用
+- ⚛️ **可选 React 集成**：提供 Hooks 和 Context API
+- 🎯 **多种分流策略**：Random、CRC32、自定义函数
+- 💾 **持久化存储**：基于 localStorage 的分流结果缓存
+- 🔧 **灵活配置**：支持百度统计或完全自定义
+- 📊 **增量更新**：智能的配置变更检测和重新分流
+- 🐛 **调试友好**：URL 参数强制命中、可控日志输出
+
+## 安装
 
 ```bash
 npm install abtest-kit
 # 或
 pnpm add abtest-kit
+# 或
+yarn add abtest-kit
 ```
 
-## 3. 核心功能
+**可选依赖：**
 
-### 3.1 初始化配置
+- React 18+ (仅在使用 React 集成时需要)
 
-SDK提供了以下主要组件和功能：
+## 快速开始
 
-1. `ABTestProvider`: React上下文提供者，用于管理全局A/B测试状态
-2. `useABTest`: Hook用于访问A/B测试上下文
-3. `useABTestValue`: Hook用于获取特定A/B测试的值
-4. `initABTestsConfig`: 初始化A/B测试配置的函数
+### 方式一：独立使用（无需 React）
 
-### 3.2 使用示例
+适用于任何 JavaScript 项目，在页面加载时进行分流：
 
-```jsx
+```javascript
+import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
+
+// 定义分流配置
+const config = {
+  newFeature: {
+    key: 'new_feature',
+    groups: {
+      0: 50,  // 对照组 50%
+      1: 50   // 实验组 50%
+    }
+  }
+};
+
+// 初始化分流（结果会自动缓存到 localStorage）
+const result = initGlobalABTest(config);
+
+// 在任何地方获取分流值
+const featureValue = getGlobalABTestValue('newFeature');
+
+if (featureValue === 1) {
+  // 显示新功能
+} else {
+  // 显示旧功能
+}
+```
+
+### 方式二：React 集成
+
+适用于 React 应用，提供响应式的分流状态：
+
+```tsx
 import { ABTestProvider, useABTestValue } from 'abtest-kit';
 
-// 定义A/B测试配置
 const abTestConfig = {
   featureA: {
     key: 'feature_a',
     value: -1,
-    groups: {
-      0: 50,  // 对照组 50%
-      1: 50   // 实验组 50%
-    },
-    strategy: 'random'
-  },
-  featureB: {
-    key: 'feature_b',
-    value: -1,
-    groups: {
-      0: 50,
-      1: 50
-    },
+    groups: { 0: 50, 1: 50 },
     strategy: 'random'
   }
 };
 
-// 在应用根组件中使用Provider
 function App() {
   return (
-    <ABTestProvider
-      abTestConfig={abTestConfig}
-      injectScript={() => {
-        // 注入百度统计脚本
-        const script = document.createElement('script');
-        script.src = '//hm.baidu.com/hm.js?YOUR_SITE_ID';
-        document.head.appendChild(script);
-      }}
-    >
-      <YourApp />
+    <ABTestProvider abTestConfig={abTestConfig}>
+      <YourComponent />
     </ABTestProvider>
   );
 }
 
-// 在组件中使用A/B测试
 function YourComponent() {
-  const featureAValue = useABTestValue('featureA');
+  const featureValue = useABTestValue('featureA');
 
   return (
     <div>
-      {featureAValue === 1 ? '实验组' : '对照组'}
+      {featureValue === 1 ? '新功能' : '旧功能'}
     </div>
   );
 }
 ```
 
-## 4. 架构设计
+## 核心 API
 
-### 4.1 核心架构
+### 独立使用 API
 
-SDK采用React Context API实现状态管理，主要包含以下部分：
+#### `initGlobalABTest(config, options?)`
 
-1. **状态管理层**
+初始化全局分流，结果会缓存到 localStorage。
 
-- - 使用React Context管理全局A/B测试状态
-  - 提供状态访问和更新的接口
-
-1. **初始化层**
-
-- - 负责与百度统计集成
-  - 处理A/B测试配置的初始化
-  - 支持异步加载和状态更新
-
-1. **工具层**
-
-- - 提供URL参数解析
-  - 支持强制命中实验策略
-  - 提供用户统计信息生成
-
-### 4.2 数据流
-![flow](./assets/flow.png)
-
-
-## 5. 高级特性
-
-### 5.1 强制命中实验模式
-
-通过URL参数`forceHitTestFlag`可以强制设置A/B测试的值，格式为：
-
-```plain
-?forceHitTestFlag=feature_a-1;feature_b-0
+```typescript
+const result = initGlobalABTest(
+  {
+    test1: {
+      key: 'test1',
+      groups: { 0: 50, 1: 50 }
+    }
+  },
+  {
+    strategy: 'random',  // 'random' | 'crc32' | 自定义函数
+    userId: 'user123',   // crc32 策略需要
+    storageKey: '__abtest__'  // 自定义存储键
+  }
+);
 ```
 
-### 5.2 实验命中统计
+#### `getGlobalABTestValue(testName, storageKey?)`
 
-SDK会自动生成实验命中统计信息（userstat），格式为：
+获取指定测试的分流值。
 
-```plain
-feature_a-1;feature_b-0
+```typescript
+const value = getGlobalABTestValue('test1');  // 返回 0 或 1 或 -1（未初始化）
 ```
 
-### 5.3 自定义分流策略
+#### `getGlobalABTestUserstat(storageKey?)`
 
-1. 百度统计分流（默认）
-2. 随机分流
-3. CRC32分流
+获取所有分流结果的统计字符串。
 
-```jsx
-// 使用百度统计策略（默认）
-function AppWithBaiduTongji() {
-  return (
-    <ABTestProvider 
-      abTestConfig={abTestConfig}
-      injectScript={() => {
-        const script = document.createElement('script');
-        script.src = '//hm.baidu.com/hm.js?YOUR_SITE_ID';
-        document.head.appendChild(script);
-      }}
-    >
-      <App />
-    </ABTestProvider>
-  );
-}
-
-// 使用随机分流策略
-function AppWithRandom() {
-  return (
-    <ABTestProvider 
-      abTestConfig={abTestConfig}
-      options={{
-        strategy: 'random'
-      }}
-    >
-      <App />
-    </ABTestProvider>
-  );
-}
+```typescript
+const userstat = getGlobalABTestUserstat();  // "test_1-0;test_2-1"
 ```
 
-**策略模式：**SDK采用了策略模式来实现不同的分流策略：
+#### `resetGlobalABTest(config, options?)`
 
-1. **策略接口**
+清除缓存并重新分流。
 
-- - 每个策略都实现了相同的接口
-  - 包含 `name` 和 `getValue` 方法
-  - `getValue` 方法返回 Promise，确保异步兼容性
+```typescript
+const newResult = resetGlobalABTest(config);
+```
 
-1. **策略工厂**
+### React API
 
-- - 通过 `getStrategy` 函数获取对应的策略实现
-  - 支持策略的动态切换
-  - 提供默认回退机制
+#### `<ABTestProvider>`
 
-**配置选项**
+React 上下文提供者。
 
 ```tsx
-interface ABTestOptions {
-  strategy?: 'baiduTongji' | 'random' | 'crc32';
-  userId?: string;  // 用于CRC32策略
-}
+<ABTestProvider
+  abTestConfig={config}
+  options={{ userId: 'user123' }}
+  injectScript={() => {
+    // 可选：注入百度统计脚本
+  }}
+>
+  <App />
+</ABTestProvider>
 ```
 
-源码实现：
+#### `useABTest()`
 
-```js
-import crc32 from 'crc-32';
+获取完整的 AB 测试上下文。
 
-// 百度统计分流策略
-export const baiduTongjiStrategy = {
-    name: 'baiduTongji',
-    getValue: async (config) => {
-        return new Promise(resolve => {
-            window._hmt.push(['_fetchABTest', {
-                paramName: config.key,
-                defaultValue: -1,
-                callback: function (value) {
-                    resolve(value);
-                }
-            }]);
-        });
+```tsx
+const { abTestConfig, pending, userstat } = useABTest();
+```
+
+#### `useABTestValue(testName)`
+
+获取特定测试的值。
+
+```tsx
+const value = useABTestValue('test1');
+```
+
+
+## 分流策略
+
+### Random 策略（默认）
+
+完全随机分流，每次初始化时随机分配。
+
+```javascript
+initGlobalABTest(config, { strategy: 'random' });
+```
+
+### CRC32 策略
+
+基于用户 ID 的确定性分流，同一用户始终分配到相同组。
+
+```javascript
+initGlobalABTest(config, {
+  strategy: 'crc32',
+  userId: 'user_12345'
+});
+```
+
+### 自定义策略
+
+传入自定义函数实现特定分流逻辑。
+
+```javascript
+// 全局自定义策略
+initGlobalABTest(config, {
+  strategy: (groups) => {
+    // 基于时间的分流
+    const hour = new Date().getHours();
+    return hour % 2 === 0 ? 0 : 1;
+  }
+});
+
+// 单个实验自定义策略
+const config = {
+  test1: {
+    key: 'test1',
+    groups: { 0: 50, 1: 50 },
+    strategy: (groups) => {
+      // 只对这个实验生效
+      return Math.random() > 0.7 ? 1 : 0;
     }
-};
-
-// 随机分流策略
-export const randomStrategy = {
-    name: 'random',
-    getValue: async (config) => {
-        return Math.random() < 0.5 ? 0 : 1;
-    }
-};
-
-// CRC32分流策略
-export const crc32Strategy = {
-    name: 'crc32',
-    getValue: async (config, userId) => {
-        if (!userId) {
-            console.warn('CRC32 strategy requires userId');
-            return -1;
-        }
-        const hash = crc32.str(userId);
-        const unsigned = hash >>> 0;
-        return unsigned % 2; // 返回0或1
-    }
-};
-
-// 策略工厂
-export const getStrategy = (strategyName) => {
-    switch (strategyName) {
-        case 'baiduTongji':
-            return baiduTongjiStrategy;
-        case 'random':
-            return randomStrategy;
-        case 'crc32':
-            return crc32Strategy;
-        default:
-            console.warn(`Unknown strategy: ${strategyName}, falling back to baiduTongji`);
-            return baiduTongjiStrategy;
-    }
+  }
 };
 ```
+
+### 百度统计策略
+
+与百度统计 A/B 测试平台集成（需要在 React 中使用）。
+
+```tsx
+<ABTestProvider
+  abTestConfig={{
+    test1: {
+      key: 'test1',
+      value: -1,
+      strategy: 'baiduTongji'
+    }
+  }}
+  injectScript={() => {
+    const script = document.createElement('script');
+    script.src = '//hm.baidu.com/hm.js?YOUR_SITE_ID';
+    document.head.appendChild(script);
+  }}
+>
+  <App />
+</ABTestProvider>
+```
+
+
+
+## 数据流
+![flow](./assets/flow.png)
 
 ## 6. 全局分流（无React依赖）
 
@@ -561,3 +574,20 @@ function MyComponent() {
 # 其他资料
 
 https://zhuanlan.zhihu.com/p/571901803
+
+
+## License
+
+💛 [MIT](./LICENSE) License © [Sunny-117](https://github.com/Sunny-117)
+<!-- Badges -->
+
+[npm-version-src]: https://img.shields.io/npm/v/abtest-kit?style=flat&colorA=080f12&colorB=1fa669
+[npm-version-href]: https://npmjs.com/package/abtest-kit
+[npm-downloads-src]: https://img.shields.io/npm/dm/abtest-kit?style=flat&colorA=080f12&colorB=1fa669
+[npm-downloads-href]: https://npmjs.com/package/abtest-kit
+[bundle-src]: https://img.shields.io/bundlephobia/minzip/abtest-kit?style=flat&colorA=080f12&colorB=1fa669&label=minzip
+[bundle-href]: https://bundlephobia.com/result?p=abtest-kit
+[license-src]: https://img.shields.io/github/license/Sunny-117/abtest-kit.svg?style=flat&colorA=080f12&colorB=1fa669
+[license-href]: https://github.com/Sunny-117/abtest-kit/blob/main/LICENSE
+[jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
+[jsdocs-href]: https://www.jsdocs.io/package/abtest-kit
