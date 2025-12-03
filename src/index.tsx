@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { forceHitTestFlag, getExperimentHitStatus } from './forceHitTestFlag';
-import { getStrategy } from './strategies';
+import { baiduTongjiStrategy } from './builtin';
 import { resolveStrategyGroupId } from './resolveStrategy';
 import { logger } from './logger';
 import {
@@ -69,16 +69,10 @@ export const initABTestsConfig = (
                     return;
                 }
                 
-                // 否则使用旧的策略系统（baiduTongji等）
-                const selectedStrategy = getStrategy(strategy as 'baiduTongji' | 'random' | 'crc32');
-                
+                // 使用百度统计分流（在 百度统计实验控制台 配置分流规则，无需传递 groups）
                 // 确保_hmt已初始化（仅在使用百度统计策略时需要）
-                if (strategy === 'baiduTongji') {
-                    window._hmt = window._hmt || [];
-                }
-
-                // 使用选定的策略获取测试值
-                selectedStrategy.getValue(config, userId).then(value => {
+                window._hmt = window._hmt || [];
+                baiduTongjiStrategy.getValue(config, userId).then(value => {
                     logger.debug(`AB test resolved: ${testName}`, { testName, value });
                     if (value !== undefined) {
                         abTestConfig[testName].value = value;
