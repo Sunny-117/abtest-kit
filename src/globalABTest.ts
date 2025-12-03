@@ -1,5 +1,6 @@
 import { GlobalABTestOptions, GlobalABTestResult, GlobalABTestConfig, StoredData } from "./types";
 import { resolveStrategyGroupId } from './resolveStrategy';
+import { CONFIG_SUFFIX, DEFAULT_STORAGE_KEY } from "./constant";
 
 /**
  * 全局存储当前的分流配置，用于getGlobalABTestUserstat获取
@@ -73,12 +74,12 @@ export const initGlobalABTest = (
   const {
     strategy = 'random',
     userId,
-    storageKey = '__global_abtest__'
+    storageKey = DEFAULT_STORAGE_KEY
   } = options;
 
   // 保存配置到全局变量，用于getGlobalABTestUserstat获取
   globalConfigMap = configMap;
-  localStorage.setItem(storageKey + '__config__', JSON.stringify(globalConfigMap));
+  localStorage.setItem(storageKey + CONFIG_SUFFIX, JSON.stringify(globalConfigMap));
 
   // 获取存储的数据
   const storedData = getStoredData(storageKey);
@@ -123,7 +124,7 @@ export const initGlobalABTest = (
  * @param storageKey 存储键
  * @returns 分流值，如果未初始化则返回-1
  */
-export const getGlobalABTestValue = (testName: string, storageKey: string = '__global_abtest__'): number => {
+export const getGlobalABTestValue = (testName: string, storageKey: string = DEFAULT_STORAGE_KEY): number => {
   try {
     const stored = localStorage.getItem(storageKey);
     if (!stored) return -1;
@@ -140,7 +141,7 @@ export const getGlobalABTestValue = (testName: string, storageKey: string = '__g
  * 清除全局分流缓存
  * @param storageKey 存储键
  */
-export const clearGlobalABTestCache = (storageKey: string = '__global_abtest__'): void => {
+export const clearGlobalABTestCache = (storageKey: string = DEFAULT_STORAGE_KEY): void => {
   try {
     localStorage.removeItem(storageKey);
   } catch (error) {
@@ -158,7 +159,7 @@ export const resetGlobalABTest = (
   configMap: GlobalABTestConfig,
   options: GlobalABTestOptions = {}
 ): GlobalABTestResult => {
-  const { storageKey = '__global_abtest__' } = options;
+  const { storageKey = DEFAULT_STORAGE_KEY } = options;
   clearGlobalABTestCache(storageKey);
   return initGlobalABTest(configMap, options);
 };
@@ -167,11 +168,11 @@ export const resetGlobalABTest = (
  * 获取所有全局分流结果的userstat字符串
  * 返回格式与useABTest的userstat一致：key-value;key-value;...
  * 复用getUserstat的逻辑处理格式
- * @param storageKey 存储键，默认'__global_abtest__'
+ * @param storageKey 存储键，默认DEFAULT_STORAGE_KEY
  * @returns 格式化的分流结果字符串，如果未初始化则返回空字符串
  */
 export const getGlobalABTestUserstat = (
-  storageKey: string = '__global_abtest__'
+  storageKey: string = DEFAULT_STORAGE_KEY
 ): string => {
   try {
     const stored = localStorage.getItem(storageKey);
@@ -179,7 +180,7 @@ export const getGlobalABTestUserstat = (
 
     const data = JSON.parse(stored);
     const result = data?.result || {};
-    const globalConfigMapFromStorage = JSON.parse(localStorage.getItem(storageKey + '__config__') || '{}') as GlobalABTestConfig;
+    const globalConfigMapFromStorage = JSON.parse(localStorage.getItem(storageKey + CONFIG_SUFFIX) || '{}') as GlobalABTestConfig;
     // 复用getUserstat的逻辑：按照configMap的顺序生成userstat字符串
     // 格式：key-value;key-value;...
     return Object.entries(globalConfigMapFromStorage)

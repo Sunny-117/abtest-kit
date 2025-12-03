@@ -45,7 +45,7 @@ export interface ABTestProviderProps {
 }
 
 export interface ResolvedABTestConfig {
-    strategy: Omit<StrategyType, 'baiduTongji'>;
+    strategy: OmitStrategyType;
     userId?: string;
 }
 
@@ -53,9 +53,9 @@ export interface ResolvedABTestConfig {
  * 全局分流选项
  */
 export interface GlobalABTestOptions {
-    strategy?: Omit<StrategyType, 'baiduTongji'>; // 分流策略：random(默认) 或 crc32
+    strategy?: OmitStrategyType; // 分流策略：random(默认) 或 crc32
     userId?: string; // 用户ID，crc32策略必需
-    storageKey?: string; // localStorage存储键，默认'__global_abtest__'
+    storageKey?: string; // localStorage存储键，默认DEFAULT_STORAGE_KEY
 }
 
 /**
@@ -68,7 +68,7 @@ export interface GlobalABTestResult {
 export type GlobalABTestConfig = {
     [k: string]: Omit<ABTestConfig, 'value' | 'groups' | 'strategy'> & {
         groups: { [groupId: number]: number };
-        strategy?: Omit<StrategyType, 'baiduTongji'>;
+        strategy?: OmitStrategyType;
     };
 };
 

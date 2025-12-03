@@ -440,7 +440,7 @@ clearGlobalABTestCache();
 - `options`: 可选配置对象
   - `strategy`: 全局分流策略，'random'（默认）、'crc32'或自定义函数
   - `userId`: 用户ID，crc32策略必需
-  - `storageKey`: localStorage存储键，默认'__global_abtest__'
+  - `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
 
 **自定义策略函数格式：**
 ```typescript
@@ -455,7 +455,7 @@ clearGlobalABTestCache();
 
 **参数：**
 - `testName`: 测试名称
-- `storageKey`: localStorage存储键，默认'__global_abtest__'
+- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
 
 **返回值：** 分流值，如果未初始化则返回-1
 
@@ -464,7 +464,7 @@ clearGlobalABTestCache();
 获取所有分流结果的userstat字符串，格式与 `useABTest` 的 `userstat` 一致。
 
 **参数：**
-- `storageKey`: localStorage存储键，默认'__global_abtest__'
+- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
 
 **返回值：** 格式化的分流结果字符串，格式为 `key-value;key-value;...`
 
@@ -491,7 +491,7 @@ window.$abtestUserstat = userstat;
 清除全局分流缓存。
 
 **参数：**
-- `storageKey`: localStorage存储键，默认'__global_abtest__'
+- `storageKey`: localStorage存储键，默认DEFAULT_STORAGE_KEY
 
 #### `resetGlobalABTest(configMap, options?)`
 
