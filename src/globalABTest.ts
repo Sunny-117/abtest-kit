@@ -1,4 +1,4 @@
-import { GlobalABTestConfig, GlobalABTestOptions, GlobalABTestResult, GlobalConfig, StoredData } from "./types";
+import { GlobalABTestOptions, GlobalABTestResult, GlobalConfig, StoredData } from "./types";
 import { resolveStrategyGroupId } from './resolveStrategy';
 
 /**
@@ -67,7 +67,7 @@ const saveData = (
  * @returns 分流结果
  */
 export const initGlobalABTest = (
-  configMap: { [testName: string]: GlobalABTestConfig },
+  configMap: GlobalConfig,
   options: GlobalABTestOptions = {}
 ): GlobalABTestResult => {
   const {
@@ -155,7 +155,7 @@ export const clearGlobalABTestCache = (storageKey: string = '__global_abtest__')
  * @returns 新的分流结果
  */
 export const resetGlobalABTest = (
-  configMap: { [testName: string]: GlobalABTestConfig },
+  configMap: GlobalConfig,
   options: GlobalABTestOptions = {}
 ): GlobalABTestResult => {
   const { storageKey = '__global_abtest__' } = options;

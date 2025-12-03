@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   initGlobalABTest,
   getGlobalABTestUserstat,
-  resetGlobalABTest
+  resetGlobalABTest,
+  type GlobalConfig
 } from 'abtest-kit';
 
 const getUserId = () => {
@@ -14,12 +15,12 @@ const getUserId = () => {
   return userId;
 };
 
-const globalABTestConfig = {
+const globalABTestConfig: GlobalConfig = {
   themeColor: {
     key: 'themeColor',
     groups: {
-      0: 99,
-      1: 1,
+      0: 50,
+      1: 50,
     },
     strategy: 'random' as const
   },

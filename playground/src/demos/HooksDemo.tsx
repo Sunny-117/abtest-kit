@@ -1,6 +1,6 @@
-import { ABTestProvider, useABTest, useABTestValue } from 'abtest-kit';
+import { ABTestProvider, useABTest, useABTestValue, type ABTestConfigMap } from 'abtest-kit';
 
-const abTestConfig = {
+const abTestConfig: ABTestConfigMap = {
   buttonColor: {
     key: 'buttonColor',
     value: -1,
