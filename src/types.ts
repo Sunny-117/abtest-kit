@@ -1,9 +1,21 @@
 import { ReactNode } from 'react';
 
+/**
+ * 自定义分流策略函数类型
+ */
+export type CustomStrategyFunction = (
+  groups: { [groupId: number]: number }
+) => number;
+
+export type StrategyType = 'baiduTongji' | 'random' | 'crc32' | CustomStrategyFunction;
+export type OmitStrategyType = Omit<StrategyType, 'baiduTongji'>
 export interface ABTestConfig {
     key: string;
-    paramName: string;
     value: number;
+    groups?: {
+        [groupId: number]: number; // groupId -> 分流比例 (0-100)
+    };
+    strategy?: StrategyType;
 }
 
 export interface ABTestConfigMap {
@@ -17,7 +29,6 @@ export interface ABTestContextType {
 }
 
 export interface ABTestOptions {
-    strategy?: 'baiduTongji' | 'random' | 'crc32';
     userId?: string;
 }
 
@@ -33,24 +44,18 @@ export interface ABTestProviderProps {
     options?: ABTestOptions;
 }
 
-/**
- * 全局分流配置
- */
-export interface GlobalABTestConfig {
-    key: string;
-    paramName: string;
-    groups: {
-        [groupId: number]: number; // groupId -> 分流比例 (0-100)
-    };
+export interface ResolvedABTestConfig {
+    strategy: OmitStrategyType;
+    userId?: string;
 }
 
 /**
  * 全局分流选项
  */
 export interface GlobalABTestOptions {
-    strategy?: 'random' | 'crc32'; // 分流策略：random(默认) 或 crc32
+    strategy?: OmitStrategyType; // 分流策略：random(默认) 或 crc32
     userId?: string; // 用户ID，crc32策略必需
-    storageKey?: string; // localStorage存储键，默认'__global_abtest__'
+    storageKey?: string; // localStorage存储键，默认DEFAULT_STORAGE_KEY
 }
 
 /**
@@ -58,4 +63,21 @@ export interface GlobalABTestOptions {
  */
 export interface GlobalABTestResult {
     [testName: string]: number;
+}
+
+export type GlobalABTestConfig = {
+    [k: string]: Omit<ABTestConfig, 'value' | 'groups' | 'strategy'> & {
+        groups: { [groupId: number]: number };
+        strategy?: OmitStrategyType;
+    };
+};
+
+
+
+/**
+ * 获取存储的分流结果和元数据
+ */
+export interface StoredData {
+  result: GlobalABTestResult;
+  configHashes?: { [testName: string]: string }; // 存储每个测试的配置哈希
 }

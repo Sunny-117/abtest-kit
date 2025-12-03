@@ -1,20 +1,33 @@
-import { ABTestProvider, useABTest, useABTestValue } from 'abtest-kit';
+import { ABTestProvider, useABTest, useABTestValue, type ABTestConfigMap } from 'abtest-kit';
 
-const abTestConfig = {
+const abTestConfig: ABTestConfigMap = {
   buttonColor: {
     key: 'buttonColor',
-    paramName: 'buttonColor',
-    value: -1
+    value: -1,
+    groups: {
+      0: 50,
+      1: 50
+    },
+    strategy: 'random' as const
   },
   layoutStyle: {
     key: 'layoutStyle',
-    paramName: 'layoutStyle',
-    value: -1
+    value: -1,
+    groups: {
+      0: 33,
+      1: 33,
+      2: 34
+    },
+    strategy: 'crc32' as const,
   },
   featureFlag: {
     key: 'featureFlag',
-    paramName: 'featureFlag',
-    value: -1
+    value: -1,
+    groups: {
+      0: 70,
+      1: 30
+    },
+    strategy: 'random' as const
   }
 };
 
@@ -48,10 +61,11 @@ function HooksDemoContent() {
 }
 
 export default function HooksDemo() {
+  const userId = '123';
   return (
     <ABTestProvider 
       abTestConfig={abTestConfig}
-      options={{ strategy: 'random' }}
+      options={{userId}}
     >
       <HooksDemoContent />
     </ABTestProvider>

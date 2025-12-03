@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { forceHitTestFlag, getExperimentHitStatus } from './forceHitTestFlag';
-import { getStrategy } from './strategies';
+import { baiduTongjiStrategy } from './builtin';
+import { resolveStrategyGroupId } from './resolveStrategy';
+import { logger } from './logger';
 import {
     ABTestConfigMap,
     ABTestContextType,
     ABTestOptions,
-    ABTestProviderProps
+    ABTestProviderProps,
 } from './types';
+
 
 // 获取所有AB测试的状态字符串
 export const getUserstat = (c: ABTestConfigMap): string => {
@@ -34,37 +37,45 @@ export const initABTestsConfig = (
     options: ABTestOptions = {},
     injectScript?: () => void,
 ): Promise<ABTestConfigMap> => {
-    const { strategy = 'baiduTongji', userId } = options;
-    const selectedStrategy = getStrategy(strategy);
+    const { userId } = options;
 
     try {
         injectScript?.();
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to inject script', error);
     }
 
-    // 确保_hmt已初始化（仅在使用百度统计策略时需要）
-    if (strategy === 'baiduTongji') {
-        window._hmt = window._hmt || [];
-    }
     return new Promise(resolve => {
-        const abTestPromises = Object.values(abTestConfig).map(config => {
+        const abTestPromises = Object.entries(abTestConfig).map(([testName, config]) => {
             return new Promise<void>(promiseResolve => {
                 // 检查是否使用强制测试模式
                 if (location.href.includes(forceHitTestFlag)) {
-                    const forceValue = getExperimentHitStatus(abTestConfig)[config.paramName];
+                    const forceValue = getExperimentHitStatus(abTestConfig)[testName];
                     if (forceValue !== undefined) {
-                        abTestConfig[config.paramName].value = forceValue;
+                        abTestConfig[testName].value = forceValue;
                     }
                     promiseResolve();
                     return;
                 }
 
-                // 使用选定的策略获取测试值
-                selectedStrategy.getValue(config, userId).then(value => {
-                    console.log({abTestConfig, c: config.paramName, value})
+                // 使用配置中指定的策略，如果没有则使用默认策略
+                const strategy = config.strategy || 'baiduTongji';
+                
+                // 如果配置了groups，使用统一的策略解析逻辑
+                if (config.groups) {
+                    const value = resolveStrategyGroupId(strategy, config.groups, userId, testName);
+                    abTestConfig[testName].value = value;
+                    promiseResolve();
+                    return;
+                }
+                
+                // 使用百度统计分流（在 百度统计实验控制台 配置分流规则，无需传递 groups）
+                // 确保_hmt已初始化（仅在使用百度统计策略时需要）
+                window._hmt = window._hmt || [];
+                baiduTongjiStrategy.getValue(config, userId).then(value => {
+                    logger.debug(`AB test resolved: ${testName}`, { testName, value });
                     if (value !== undefined) {
-                        abTestConfig[config.paramName].value = value;
+                        abTestConfig[testName].value = value;
                     }
                     promiseResolve();
                 });
@@ -110,7 +121,7 @@ export const ABTestProvider = ({
             });
             window.$abtestUserstat = userstat;
         }).catch(error => {
-            console.error('AB测试初始化失败:', error);
+            logger.error('AB测试初始化失败', error);
         });
     }, []);
 
@@ -142,8 +153,7 @@ export {
     getGlobalABTestValue,
     getGlobalABTestUserstat,
     clearGlobalABTestCache,
-    resetGlobalABTest,
-    type GlobalABTestConfig,
-    type GlobalABTestOptions,
-    type GlobalABTestResult
+    resetGlobalABTest
 } from './globalABTest';
+
+export * from './types';
