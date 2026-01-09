@@ -1,6 +1,38 @@
 # Changelog
 
 
+## v0.0.2
+
+[compare changes](https://github.com/sunny-117/abtest//compare/v0.0.1...v0.0.2)
+
+### 🩹 Fixes
+
+- 🐛 clear ([b4c54cc](https://github.com/sunny-117/abtest//commit/b4c54cc))
+- 🐛 logo ([53bccc9](https://github.com/sunny-117/abtest//commit/53bccc9))
+
+### 📖 Documentation
+
+- ✏️ api reference ([a085ef8](https://github.com/sunny-117/abtest//commit/a085ef8))
+- ✏️ bundler ([18004db](https://github.com/sunny-117/abtest//commit/18004db))
+- ✏️ update link ([ad63358](https://github.com/sunny-117/abtest//commit/ad63358))
+- ✏️ style ([6f6f77f](https://github.com/sunny-117/abtest//commit/6f6f77f))
+- ✏️ update ([5c20aed](https://github.com/sunny-117/abtest//commit/5c20aed))
+- ✏️ version ([5353592](https://github.com/sunny-117/abtest//commit/5353592))
+
+### 🏡 Chore
+
+- 🤖 update readme ([8071ca4](https://github.com/sunny-117/abtest//commit/8071ca4))
+- 🤖 docs ([0eea4b1](https://github.com/sunny-117/abtest//commit/0eea4b1))
+- 🤖 readme ([d107a68](https://github.com/sunny-117/abtest//commit/d107a68))
+- 🤖 update docs ([0037f2d](https://github.com/sunny-117/abtest//commit/0037f2d))
+- 🤖 logo ([c2f611e](https://github.com/sunny-117/abtest//commit/c2f611e))
+- Remove config ([5e3a4be](https://github.com/sunny-117/abtest//commit/5e3a4be))
+- Remove vscode config ([be1720b](https://github.com/sunny-117/abtest//commit/be1720b))
+
+### ❤️ Contributors
+
+- Sunny-117 <zhiqiangfu6@gmail.com>
+
 ## v0.0.1
 
 

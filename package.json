@@ -1,6 +1,6 @@
 {
   "name": "abtest-kit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Lightweight A/B testing SDK with multiple strategies (random, CRC32, custom) and optional React integration. Supports Baidu Tongji and standalone usage.",
   "keywords": [
     "ab-test",
