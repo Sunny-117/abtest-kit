@@ -1,15 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { forceHitTestFlag, getExperimentHitStatus } from './forceHitTestFlag';
-import { baiduTongjiStrategy } from './builtin';
-import { resolveStrategyGroupId } from './resolveStrategy';
-import { logger } from './logger';
-import {
-    ABTestConfigMap,
-    ABTestContextType,
-    ABTestOptions,
-    ABTestProviderProps,
-} from './types';
-
+import React, { createContext, useState, useEffect, useRef } from 'react';
+import { ABTestConfigMap, ABTestContextType, ABTestOptions } from '../core/types';
+import { forceHitTestFlag, getExperimentHitStatus } from '../core/forceHitTestFlag';
+import { baiduTongjiStrategy } from '../core/builtin';
+import { resolveStrategyGroupId } from '../core/resolveStrategy';
+import { logger } from '../core/logger';
+import { ABTestProviderProps } from './types';
 
 // 获取所有AB测试的状态字符串
 export const getUserstat = (c: ABTestConfigMap): string => {
@@ -19,7 +14,7 @@ export const getUserstat = (c: ABTestConfigMap): string => {
 };
 
 // 创建AB测试上下文
-const ABTestContext = createContext<ABTestContextType>({
+export const ABTestContext = createContext<ABTestContextType>({
     abTestConfig: {},
     pending: false,
     userstat: ''
@@ -60,7 +55,7 @@ export const initABTestsConfig = (
 
                 // 使用配置中指定的策略，如果没有则使用默认策略
                 const strategy = config.strategy || 'baiduTongji';
-                
+
                 // 如果配置了groups，使用统一的策略解析逻辑
                 if (config.groups) {
                     const value = resolveStrategyGroupId(strategy, config.groups, userId, testName);
@@ -68,7 +63,7 @@ export const initABTestsConfig = (
                     promiseResolve();
                     return;
                 }
-                
+
                 // 使用百度统计分流（在 百度统计实验控制台 配置分流规则，无需传递 groups）
                 // 确保_hmt已初始化（仅在使用百度统计策略时需要）
                 window._hmt = window._hmt || [];
@@ -131,29 +126,3 @@ export const ABTestProvider = ({
         </ABTestContext.Provider>
     );
 };
-
-/**
- * 使用AB测试上下文的Hook
- */
-export const useABTest = (): ABTestContextType => {
-    return useContext(ABTestContext);
-};
-
-/**
- * 获取特定AB测试值的Hook
- */
-export const useABTestValue = (testName: string): number => {
-    const { abTestConfig, pending } = useABTest();
-    return !pending ? abTestConfig[testName]?.value : -1;
-};
-
-// 导出全局分流相关的API和类型
-export {
-    initGlobalABTest,
-    getGlobalABTestValue,
-    getGlobalABTestUserstat,
-    clearGlobalABTestCache,
-    resetGlobalABTest
-} from './globalABTest';
-
-export * from './types';

@@ -4,8 +4,8 @@
  */
 
 import process from 'node:process';
-import { initGlobalABTest } from '../globalABTest';
-import { GlobalABTestConfig } from '../types';
+import { initGlobalABTest } from '../core/globalABTest';
+import { GlobalABTestConfig } from '../core/types';
 
 // 模拟localStorage
 const mockStorage: { [key: string]: string } = {};

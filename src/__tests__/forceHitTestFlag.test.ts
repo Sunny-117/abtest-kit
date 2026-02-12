@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getExperimentHitStatus, forceHitTestFlag } from '../forceHitTestFlag';
-import { ABTestConfigMap } from '../types';
+import { getExperimentHitStatus, forceHitTestFlag } from '../core/forceHitTestFlag';
+import { ABTestConfigMap } from '../core/types';
 
 describe('forceHitTestFlag', () => {
   const mockConfig: ABTestConfigMap = {

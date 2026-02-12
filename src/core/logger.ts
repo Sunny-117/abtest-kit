@@ -37,18 +37,18 @@ let currentConfig: LoggerConfig = { ...defaultConfig };
  */
 const formatMessage = (level: string, message: string, data?: any): string => {
   const parts: string[] = [];
-  
+
   if (currentConfig.enableTimestamp) {
     parts.push(new Date().toISOString());
   }
-  
+
   if (currentConfig.prefix) {
     parts.push(currentConfig.prefix);
   }
-  
+
   parts.push(`[${level}]`);
   parts.push(message);
-  
+
   return parts.join(' ');
 };
 

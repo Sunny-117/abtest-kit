@@ -1,5 +1,3 @@
-import { ReactNode } from 'react';
-
 /**
  * 自定义分流策略函数类型
  */
@@ -9,6 +7,7 @@ export type CustomStrategyFunction = (
 
 export type StrategyType = 'baiduTongji' | 'random' | 'crc32' | CustomStrategyFunction;
 export type OmitStrategyType = Omit<StrategyType, 'baiduTongji'>
+
 export interface ABTestConfig {
     key: string;
     value: number;
@@ -35,13 +34,6 @@ export interface ABTestOptions {
 export interface ABTestStrategy {
     name: string;
     getValue: (config: ABTestConfig, userId?: string) => Promise<number>;
-}
-
-export interface ABTestProviderProps {
-    children: ReactNode;
-    abTestConfig: ABTestConfigMap;
-    injectScript?: () => void;
-    options?: ABTestOptions;
 }
 
 export interface ResolvedABTestConfig {
@@ -71,8 +63,6 @@ export type GlobalABTestConfig = {
         strategy?: OmitStrategyType;
     };
 };
-
-
 
 /**
  * 获取存储的分流结果和元数据

@@ -5,8 +5,8 @@ import {
   clearGlobalABTestCache,
   resetGlobalABTest,
   getGlobalABTestUserstat
-} from '../globalABTest';
-import { CustomStrategyFunction } from '../types';
+} from '../core/globalABTest';
+import { CustomStrategyFunction } from '../core/types';
 
 // Mock localStorage
 const mockLocalStorage = {

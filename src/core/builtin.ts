@@ -1,4 +1,5 @@
 import { ABTestConfig, ABTestStrategy } from './types';
+
 declare global {
     interface Window {
         _hmt: any[];

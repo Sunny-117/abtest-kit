@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getRandomGroupId, getCrc32GroupId, resolveStrategyGroupId } from '../resolveStrategy';
-import { CustomStrategyFunction } from '../types';
+import { getRandomGroupId, getCrc32GroupId, resolveStrategyGroupId } from '../core/resolveStrategy';
+import { CustomStrategyFunction } from '../core/types';
 
 describe('resolveStrategy', () => {
   describe('getRandomGroupId', () => {

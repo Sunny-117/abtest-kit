@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { baiduTongjiStrategy } from '../builtin';
-import { ABTestConfig } from '../types';
+import { baiduTongjiStrategy } from '../core/builtin';
+import { ABTestConfig } from '../core/types';
 
 describe('builtin strategies', () => {
   describe('baiduTongjiStrategy', () => {
