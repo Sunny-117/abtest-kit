@@ -38,6 +38,23 @@ yarn add abtest-kit
 
 - React 18+ (仅在使用 React 集成时需要)
 
+## 引入方式
+
+SDK 提供两个独立的入口点，以优化打包体积：
+
+```javascript
+// 方式一：仅核心 API（无 React 依赖，更小的包体积）
+import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
+
+// 方式二：React 集成（包含 React 组件和 Hooks）
+import { ABTestProvider, useABTest, useABTestValue } from 'abtest-kit/react';
+```
+
+| 入口 | 包体积 | 需要 React | 适用场景 |
+|------|--------|------------|----------|
+| `abtest-kit` | ~1.8 KB | 否 | 原生 JS、Vue、Angular 等 |
+| `abtest-kit/react` | ~2.4 KB | 是 | React 应用 |
+
 ## 快速开始
 
 ### 方式一：独立使用（无需 React）
@@ -76,7 +93,7 @@ if (featureValue === 1) {
 适用于 React 应用，提供响应式的分流状态：
 
 ```tsx
-import { ABTestProvider, useABTestValue } from 'abtest-kit';
+import { ABTestProvider, useABTestValue } from 'abtest-kit/react';
 
 const abTestConfig = {
   featureA: {
@@ -156,11 +173,15 @@ const newResult = resetGlobalABTest(config);
 
 ### React API
 
+> **注意：** React API 需要从 `abtest-kit/react` 导入
+
 #### `<ABTestProvider>`
 
 React 上下文提供者。
 
 ```tsx
+import { ABTestProvider } from 'abtest-kit/react';
+
 <ABTestProvider
   abTestConfig={config}
   options={{ userId: 'user123' }}
@@ -177,6 +198,8 @@ React 上下文提供者。
 获取完整的 AB 测试上下文。
 
 ```tsx
+import { useABTest } from 'abtest-kit/react';
+
 const { abTestConfig, pending, userstat } = useABTest();
 ```
 
@@ -185,6 +208,8 @@ const { abTestConfig, pending, userstat } = useABTest();
 获取特定测试的值。
 
 ```tsx
+import { useABTestValue } from 'abtest-kit/react';
+
 const value = useABTestValue('test1');
 ```
 
@@ -242,6 +267,8 @@ const config = {
 与百度统计 A/B 测试平台集成（需要在 React 中使用）。
 
 ```tsx
+import { ABTestProvider } from 'abtest-kit/react';
+
 <ABTestProvider
   abTestConfig={{
     test1: {

@@ -48,6 +48,23 @@ yarn add abtest-kit
 
 - React 18+ (only required when using React integration)
 
+## Import Methods
+
+The SDK provides two separate entry points to optimize bundle size:
+
+```javascript
+// Method 1: Core API only (no React dependency, smaller bundle)
+import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
+
+// Method 2: React integration (includes React components and hooks)
+import { ABTestProvider, useABTest, useABTestValue } from 'abtest-kit/react';
+```
+
+| Entry Point | Bundle Size | React Required | Use Case |
+|-------------|-------------|----------------|----------|
+| `abtest-kit` | ~1.8 KB | No | Vanilla JS, Vue, Angular, etc. |
+| `abtest-kit/react` | ~2.4 KB | Yes | React applications |
+
 ## Quick Start
 
 ### Method 1: Standalone Usage (No React Required)
@@ -86,7 +103,7 @@ if (featureValue === 1) {
 Suitable for React applications, provides reactive splitting state:
 
 ```tsx
-import { ABTestProvider, useABTestValue } from 'abtest-kit';
+import { ABTestProvider, useABTestValue } from 'abtest-kit/react';
 
 const abTestConfig = {
   featureA: {
@@ -166,11 +183,15 @@ const newResult = resetGlobalABTest(config);
 
 ### React API
 
+> **Note:** React API should be imported from `abtest-kit/react`
+
 #### `<ABTestProvider>`
 
 React context provider.
 
 ```tsx
+import { ABTestProvider } from 'abtest-kit/react';
+
 <ABTestProvider
   abTestConfig={config}
   options={{ userId: 'user123' }}
@@ -187,6 +208,8 @@ React context provider.
 Get the complete AB test context.
 
 ```tsx
+import { useABTest } from 'abtest-kit/react';
+
 const { abTestConfig, pending, userstat } = useABTest();
 ```
 
@@ -195,6 +218,8 @@ const { abTestConfig, pending, userstat } = useABTest();
 Get the value for a specific test.
 
 ```tsx
+import { useABTestValue } from 'abtest-kit/react';
+
 const value = useABTestValue('test1');
 ```
 
@@ -252,6 +277,8 @@ const config = {
 Integration with Baidu Analytics A/B testing platform (requires React).
 
 ```tsx
+import { ABTestProvider } from 'abtest-kit/react';
+
 <ABTestProvider
   abTestConfig={{
     test1: {
