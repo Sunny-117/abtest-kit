@@ -42,8 +42,8 @@ importers:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
       robuild:
-        specifier: ^0.0.19
-        version: 0.0.19(magicast@0.5.1)
+        specifier: ^0.1.0
+        version: 0.1.0(magicast@0.5.1)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -377,9 +377,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@napi-rs/wasm-runtime@1.0.7':
-    resolution: {integrity: sha512-SeDnOO0Tk7Okiq6DbXmmBODgOAb9dp9gjlphokTUxmt8U3liIP1ZsozBahH69j/RJv+Rfs6IwUKHTgQYJ/HBAw==}
 
   '@napi-rs/wasm-runtime@1.1.1':
     resolution: {integrity: sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A==}
@@ -1503,8 +1500,8 @@ packages:
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
 
-  robuild@0.0.19:
-    resolution: {integrity: sha512-/QG4kdPsEGrqgObNDzC2XP8+VwAsGegzglIRHhmhogCFa68WHYM+3IyaVhuNyhoZU3iy5Zi7iFDWasGsExmpuA==}
+  robuild@0.1.0:
+    resolution: {integrity: sha512-qe+DLZfYpme+ofr4AOfBPr8eWVU/Ne/fl9XVlcYetMwHAqwurgbbfqlbrDQui0HZ6kSt1bnxxPUFM+IqFluclA==}
     hasBin: true
 
   rolldown-plugin-dts@0.16.12:
@@ -2016,13 +2013,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@napi-rs/wasm-runtime@1.0.7':
-    dependencies:
-      '@emnapi/core': 1.7.1
-      '@emnapi/runtime': 1.7.1
-      '@tybys/wasm-util': 0.10.1
-    optional: true
-
   '@napi-rs/wasm-runtime@1.1.1':
     dependencies:
       '@emnapi/core': 1.7.1
@@ -2068,7 +2058,7 @@ snapshots:
 
   '@oxc-minify/binding-wasm32-wasi@0.98.0':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.0.7
+      '@napi-rs/wasm-runtime': 1.1.1
     optional: true
 
   '@oxc-minify/binding-win32-arm64-msvc@0.98.0':
@@ -2115,7 +2105,7 @@ snapshots:
 
   '@oxc-parser/binding-wasm32-wasi@0.98.0':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.0.7
+      '@napi-rs/wasm-runtime': 1.1.1
     optional: true
 
   '@oxc-parser/binding-win32-arm64-msvc@0.98.0':
@@ -2166,7 +2156,7 @@ snapshots:
 
   '@oxc-transform/binding-wasm32-wasi@0.98.0':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.0.7
+      '@napi-rs/wasm-runtime': 1.1.1
     optional: true
 
   '@oxc-transform/binding-win32-arm64-msvc@0.98.0':
@@ -2989,7 +2979,7 @@ snapshots:
 
   resolve-pkg-maps@1.0.0: {}
 
-  robuild@0.0.19(magicast@0.5.1):
+  robuild@0.1.0(magicast@0.5.1):
     dependencies:
       c12: 3.3.2(magicast@0.5.1)
       cac: 6.7.14
