@@ -1,6 +1,36 @@
 # Changelog
 
 
+## v0.0.5
+
+[compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.4...v0.0.5)
+
+### 🚀 Enhancements
+
+- Workspace ([1e6db64](https://github.com/sunny-117/abtest-kit//commit/1e6db64))
+
+### 💅 Refactors
+
+- Reorganize package structure with dual entry points ([2878271](https://github.com/sunny-117/abtest-kit//commit/2878271))
+
+### 🏡 Chore
+
+- Update logo ([03b743d](https://github.com/sunny-117/abtest-kit//commit/03b743d))
+- Update readme ([79a0eed](https://github.com/sunny-117/abtest-kit//commit/79a0eed))
+- Remove bundle ([1eba2b7](https://github.com/sunny-117/abtest-kit//commit/1eba2b7))
+- Update readme ([000728d](https://github.com/sunny-117/abtest-kit//commit/000728d))
+- Remove chokidar ([345f054](https://github.com/sunny-117/abtest-kit//commit/345f054))
+- Update logo ([b897b6b](https://github.com/sunny-117/abtest-kit//commit/b897b6b))
+- Update logo ([afb7a71](https://github.com/sunny-117/abtest-kit//commit/afb7a71))
+- Fix deploy.sh ([474388c](https://github.com/sunny-117/abtest-kit//commit/474388c))
+- 🤖 update robuild ([e8e24c6](https://github.com/sunny-117/abtest-kit//commit/e8e24c6))
+- **release:** V0.0.3 ([e28d6ee](https://github.com/sunny-117/abtest-kit//commit/e28d6ee))
+- **release:** V0.0.4 ([9d26622](https://github.com/sunny-117/abtest-kit//commit/9d26622))
+
+### ❤️ Contributors
+
+- Sunny-117 <zhiqiangfu6@gmail.com>
+
 ## v0.0.4
 
 [compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.4...v0.0.4)
