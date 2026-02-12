@@ -1,6 +1,6 @@
 {
   "name": "abtest-kit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Lightweight A/B testing SDK with multiple strategies (random, CRC32, custom) and optional React integration. Supports Baidu Tongji and standalone usage.",
   "keywords": [
     "ab-test",
@@ -21,6 +21,7 @@
     "build": "robuild",
     "dev": "robuild --watch",
     "play": "pnpm --filter playground dev",
+    "prepublish": "pnpm build",
     "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
