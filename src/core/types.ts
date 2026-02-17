@@ -71,3 +71,13 @@ export interface StoredData {
   result: GlobalABTestResult;
   configHashes?: { [testName: string]: string }; // 存储每个测试的配置哈希
 }
+
+/**
+ * 缓存接口
+ * 用于抽象存储层，默认使用 localStorage，也可自定义实现（如 IndexedDB、Cookie 等）
+ */
+export interface CacheStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}

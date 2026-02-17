@@ -2,6 +2,7 @@ import { GlobalABTestOptions, GlobalABTestResult, GlobalABTestConfig, StoredData
 import { resolveStrategyGroupId } from './resolveStrategy';
 import { CONFIG_SUFFIX, DEFAULT_STORAGE_KEY } from "./constant";
 import { logger } from './logger';
+import { getGlobalCache } from './storage';
 
 /**
  * 全局存储当前的分流配置，用于getGlobalABTestUserstat获取
@@ -21,7 +22,8 @@ const getConfigHash = (config: { [groupId: number]: number }): string => {
 
 const getStoredData = (storageKey: string): StoredData | null => {
   try {
-    const stored = localStorage.getItem(storageKey);
+    const cache = getGlobalCache();
+    const stored = cache.getItem(storageKey);
     if (!stored) return null;
 
     const data = JSON.parse(stored);
@@ -39,7 +41,7 @@ const getStoredData = (storageKey: string): StoredData | null => {
 };
 
 /**
- * 保存分流结果和元数据到localStorage
+ * 保存分流结果和元数据到缓存
  */
 const saveData = (
   storageKey: string,
@@ -47,11 +49,12 @@ const saveData = (
   configHashes: { [testName: string]: string }
 ): void => {
   try {
+    const cache = getGlobalCache();
     const data: StoredData = {
       result,
       configHashes
     };
-    localStorage.setItem(storageKey, JSON.stringify(data));
+    cache.setItem(storageKey, JSON.stringify(data));
   } catch (error) {
     logger.warn(`Failed to save AB test result to ${storageKey}`, error);
   }
@@ -80,7 +83,8 @@ export const initGlobalABTest = (
 
   // 保存配置到全局变量，用于getGlobalABTestUserstat获取
   globalABTestConfigMap = configMap;
-  localStorage.setItem(storageKey + CONFIG_SUFFIX, JSON.stringify(globalABTestConfigMap));
+  const cache = getGlobalCache();
+  cache.setItem(storageKey + CONFIG_SUFFIX, JSON.stringify(globalABTestConfigMap));
 
   // 获取存储的数据
   const storedData = getStoredData(storageKey);
@@ -112,7 +116,7 @@ export const initGlobalABTest = (
     newConfigHashes[testName] = currentConfigHash;
   }
 
-  // 保存结果和配置哈希到localStorage
+  // 保存结果和配置哈希到缓存
   // 注意：result只包含当前config中的key，已删除的key会被自动移除
   saveData(storageKey, result, newConfigHashes);
 
@@ -127,7 +131,8 @@ export const initGlobalABTest = (
  */
 export const getGlobalABTestValue = (testName: string, storageKey: string = DEFAULT_STORAGE_KEY): number => {
   try {
-    const stored = localStorage.getItem(storageKey);
+    const cache = getGlobalCache();
+    const stored = cache.getItem(storageKey);
     if (!stored) return -1;
 
     const data = JSON.parse(stored);
@@ -144,7 +149,8 @@ export const getGlobalABTestValue = (testName: string, storageKey: string = DEFA
  */
 export const clearGlobalABTestCache = (storageKey: string = DEFAULT_STORAGE_KEY): void => {
   try {
-    localStorage.removeItem(storageKey);
+    const cache = getGlobalCache();
+    cache.removeItem(storageKey);
   } catch (error) {
     logger.warn('Failed to clear AB test cache', error);
   }
@@ -176,12 +182,13 @@ export const getGlobalABTestUserstat = (
   storageKey: string = DEFAULT_STORAGE_KEY
 ): string => {
   try {
-    const stored = localStorage.getItem(storageKey);
+    const cache = getGlobalCache();
+    const stored = cache.getItem(storageKey);
     if (!stored) return '';
 
     const data = JSON.parse(stored);
     const result = data?.result || {};
-    const globalConfigMapFromStorage = JSON.parse(localStorage.getItem(storageKey + CONFIG_SUFFIX) || '{}') as GlobalABTestConfig;
+    const globalConfigMapFromStorage = JSON.parse(cache.getItem(storageKey + CONFIG_SUFFIX) || '{}') as GlobalABTestConfig;
     // 复用getUserstat的逻辑：按照configMap的顺序生成userstat字符串
     // 格式：key-value;key-value;...
     return Object.entries(globalConfigMapFromStorage)

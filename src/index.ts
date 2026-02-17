@@ -15,7 +15,8 @@ export type {
     GlobalABTestOptions,
     GlobalABTestResult,
     GlobalABTestConfig,
-    StoredData
+    StoredData,
+    CacheStorage
 } from './core/types';
 
 // 导出常量
@@ -32,6 +33,14 @@ export {
     clearGlobalABTestCache,
     resetGlobalABTest
 } from './core/globalABTest';
+
+// 导出缓存相关 API
+export {
+    localStorageCache,
+    setGlobalCache,
+    getGlobalCache,
+    resetGlobalCache
+} from './core/storage';
 
 // 导出策略相关
 export { resolveStrategyGroupId, getRandomGroupId, getCrc32GroupId } from './core/resolveStrategy';

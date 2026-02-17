@@ -28,7 +28,7 @@
 - 🚀 **Zero Dependencies Core**: Pure JavaScript implementation, works standalone
 - ⚛️ **Optional React Integration**: Provides Hooks and Context API
 - 🎯 **Multiple Splitting Strategies**: Random, CRC32, custom functions
-- 💾 **Persistent Storage**: localStorage-based result caching
+- 💾 **Persistent Storage**: localStorage-based result caching with custom storage support
 - 🔧 **Flexible Configuration**: Supports Baidu Analytics or fully custom
 - 📊 **Incremental Updates**: Smart config change detection and re-splitting
 - 🐛 **Debug Friendly**: URL parameter force hit, controllable logging
@@ -417,13 +417,93 @@ const newResult = resetGlobalABTest(globalABTestConfig);
 clearGlobalABTestCache();
 ```
 
+### Custom Cache Storage
+
+By default, splitting results are stored in `localStorage`. You can customize the cache implementation (e.g., IndexedDB, Cookie, sessionStorage) using `setGlobalCache`.
+
+#### Cache Interface
+
+```typescript
+interface CacheStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+```
+
+#### Using sessionStorage
+
+```javascript
+import { setGlobalCache, initGlobalABTest } from 'abtest-kit';
+
+// Set to use sessionStorage
+setGlobalCache({
+  getItem: (key) => sessionStorage.getItem(key),
+  setItem: (key, value) => sessionStorage.setItem(key, value),
+  removeItem: (key) => sessionStorage.removeItem(key)
+});
+
+// Subsequent splitting operations will use sessionStorage
+initGlobalABTest(config);
+```
+
+#### Using Cookie
+
+```javascript
+import { setGlobalCache } from 'abtest-kit';
+
+// Assuming you have cookie utility functions
+setGlobalCache({
+  getItem: (key) => getCookie(key),
+  setItem: (key, value) => setCookie(key, value, { expires: 365 }),
+  removeItem: (key) => deleteCookie(key)
+});
+```
+
+#### Using IndexedDB
+
+```javascript
+import { setGlobalCache } from 'abtest-kit';
+
+// Wrap with synchronous interface (Note: IndexedDB is async, requires preloading)
+const cache = new Map();
+
+// Load data from IndexedDB to memory on initialization
+async function initCache() {
+  const data = await loadFromIndexedDB();
+  data.forEach((value, key) => cache.set(key, value));
+}
+
+setGlobalCache({
+  getItem: (key) => cache.get(key) ?? null,
+  setItem: (key, value) => {
+    cache.set(key, value);
+    saveToIndexedDB(key, value); // Async save
+  },
+  removeItem: (key) => {
+    cache.delete(key);
+    removeFromIndexedDB(key); // Async delete
+  }
+});
+```
+
+#### Reset to Default Cache
+
+```javascript
+import { resetGlobalCache } from 'abtest-kit';
+
+// Reset to default localStorage
+resetGlobalCache();
+```
+
 ## Important Notes
 
 1. React API's default splitting strategy is based on Baidu Analytics, ensure Baidu Analytics experiment splitting is properly configured before using the SDK
 2. Initialization is asynchronous, consider the `pending` state when using `useABTestValue`
-3. Global splitting uses localStorage, ensure browser supports localStorage
+3. Global splitting uses localStorage by default, ensure browser supports localStorage, or use `setGlobalCache` to customize storage
 4. Global splitting results are permanently retained once saved, unless actively calling `resetGlobalABTest()` or `clearGlobalABTestCache()`
 5. Configuration changes (including traffic ratio adjustments) will trigger re-splitting, modify configuration with caution
+6. Custom cache must be set before calling `initGlobalABTest`
 
 ## Best Practices
 

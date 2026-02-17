@@ -18,7 +18,7 @@
 - 🚀 **无依赖核心**：纯 JavaScript 实现，可独立使用
 - ⚛️ **可选 React 集成**：提供 Hooks 和 Context API
 - 🎯 **多种分流策略**：Random、CRC32、自定义函数
-- 💾 **持久化存储**：基于 localStorage 的分流结果缓存
+- 💾 **持久化存储**：基于 localStorage 的分流结果缓存，支持自定义缓存实现
 - 🔧 **灵活配置**：支持百度统计或完全自定义
 - 📊 **增量更新**：智能的配置变更检测和重新分流
 - 🐛 **调试友好**：URL 参数强制命中、可控日志输出
@@ -407,13 +407,93 @@ const newResult = resetGlobalABTest(globalABTestConfig);
 clearGlobalABTestCache();
 ```
 
+### 自定义缓存
+
+默认使用 `localStorage` 存储分流结果，你可以通过 `setGlobalCache` 自定义缓存实现（如 IndexedDB、Cookie、sessionStorage 等）。
+
+#### 缓存接口
+
+```typescript
+interface CacheStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+```
+
+#### 使用 sessionStorage
+
+```javascript
+import { setGlobalCache, initGlobalABTest } from 'abtest-kit';
+
+// 设置使用 sessionStorage
+setGlobalCache({
+  getItem: (key) => sessionStorage.getItem(key),
+  setItem: (key, value) => sessionStorage.setItem(key, value),
+  removeItem: (key) => sessionStorage.removeItem(key)
+});
+
+// 之后的分流操作会使用 sessionStorage
+initGlobalABTest(config);
+```
+
+#### 使用 Cookie
+
+```javascript
+import { setGlobalCache } from 'abtest-kit';
+
+// 假设你有 cookie 操作函数
+setGlobalCache({
+  getItem: (key) => getCookie(key),
+  setItem: (key, value) => setCookie(key, value, { expires: 365 }),
+  removeItem: (key) => deleteCookie(key)
+});
+```
+
+#### 使用 IndexedDB
+
+```javascript
+import { setGlobalCache } from 'abtest-kit';
+
+// 封装同步接口（注意：IndexedDB 是异步的，需要预加载数据）
+const cache = new Map();
+
+// 初始化时从 IndexedDB 加载数据到内存
+async function initCache() {
+  const data = await loadFromIndexedDB();
+  data.forEach((value, key) => cache.set(key, value));
+}
+
+setGlobalCache({
+  getItem: (key) => cache.get(key) ?? null,
+  setItem: (key, value) => {
+    cache.set(key, value);
+    saveToIndexedDB(key, value); // 异步保存
+  },
+  removeItem: (key) => {
+    cache.delete(key);
+    removeFromIndexedDB(key); // 异步删除
+  }
+});
+```
+
+#### 重置为默认缓存
+
+```javascript
+import { resetGlobalCache } from 'abtest-kit';
+
+// 重置为默认的 localStorage
+resetGlobalCache();
+```
+
 ## 注意事项
 
 1. React API 的默认分流策略是基于百度统计，所以确保在使用SDK前已正确配置百度统计实验分流
 2. 初始化是异步的，使用`useABTestValue`时需要考虑`pending`状态
-3. 全局分流使用localStorage存储，请确保浏览器支持localStorage
+3. 全局分流默认使用localStorage存储，请确保浏览器支持 localStorage，或使用 `setGlobalCache` 自定义缓存
 4. 全局分流结果一旦保存就永久保留，除非主动调用 `resetGlobalABTest()` 或 `clearGlobalABTestCache()`
 5. 配置变更（包括流量比例调整）会导致重新分流，请谨慎修改配置
+6. 自定义缓存需在调用 `initGlobalABTest` 之前设置
 
 ## 最佳实践
 

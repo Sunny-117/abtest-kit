@@ -12,3 +12,9 @@ export {
     clearGlobalABTestCache,
     resetGlobalABTest
 } from './globalABTest';
+export {
+    localStorageCache,
+    setGlobalCache,
+    getGlobalCache,
+    resetGlobalCache
+} from './storage';
