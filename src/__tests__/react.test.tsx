@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { render, screen } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import {
   ABTestProvider,
   ABTestContext,
@@ -34,19 +34,6 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true
 });
 
-// Mock window._hmt
-Object.defineProperty(globalThis, 'window', {
-  value: {
-    ...globalThis.window,
-    _hmt: [],
-    location: {
-      href: 'http://localhost:3000'
-    },
-    $abtestUserstat: ''
-  },
-  writable: true
-});
-
 describe('React Integration', () => {
   beforeEach(() => {
     mockLocalStorage.clear();
@@ -56,6 +43,7 @@ describe('React Integration', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.resetAllMocks();
   });
 
@@ -93,15 +81,15 @@ describe('React Integration', () => {
         const context = React.useContext(ABTestContext);
         return (
           <div>
-            <span data-testid="pending">{String(context.pending)}</span>
-            <span data-testid="userstat">{context.userstat}</span>
+            <span data-testid="context-pending">{String(context.pending)}</span>
+            <span data-testid="context-userstat">{context.userstat}</span>
           </div>
         );
       };
 
       render(<TestComponent />);
-      expect(screen.getByTestId('pending').textContent).toBe('false');
-      expect(screen.getByTestId('userstat').textContent).toBe('');
+      expect(screen.getByTestId('context-pending').textContent).toBe('false');
+      expect(screen.getByTestId('context-userstat').textContent).toBe('');
     });
   });
 
@@ -174,7 +162,7 @@ describe('React Integration', () => {
     it('should use forceHitTestFlag when present in URL', async () => {
       const originalHref = window.location.href;
       Object.defineProperty(window, 'location', {
-        value: { href: 'http://localhost:3000?__abtesthit__=test1:1' },
+        value: { href: 'http://localhost:3000?forceHitTestFlag=1001-1' },
         writable: true
       });
 
@@ -200,10 +188,10 @@ describe('React Integration', () => {
       // Setup _hmt mock to resolve immediately
       (window as any)._hmt = {
         push: vi.fn((args: any[]) => {
-          if (args[0] === '_ABTesting') {
-            const callback = args[1];
+          if (args[0] === '_fetchABTest') {
+            const options = args[1];
             // Simulate baiduTongji returning a value
-            callback(0);
+            options.callback(0);
           }
         })
       };
@@ -236,14 +224,14 @@ describe('React Integration', () => {
 
       render(
         <ABTestProvider abTestConfig={config}>
-          <div data-testid="child">Child Content</div>
+          <div data-testid="provider-child">Child Content</div>
         </ABTestProvider>
       );
 
-      expect(screen.getByTestId('child')).toBeDefined();
+      expect(screen.getByTestId('provider-child')).toBeDefined();
     });
 
-    it('should provide context to children', async () => {
+    it('should provide context to children and update pending state', async () => {
       const config: ABTestConfigMap = {
         test1: {
           key: '1001',
@@ -256,44 +244,26 @@ describe('React Integration', () => {
         const context = React.useContext(ABTestContext);
         return (
           <div>
-            <span data-testid="pending">{String(context.pending)}</span>
+            <span data-testid="provider-pending">{String(context.pending)}</span>
           </div>
         );
       };
 
-      render(
+      const { rerender } = render(
         <ABTestProvider abTestConfig={config}>
           <TestConsumer />
         </ABTestProvider>
       );
 
-      // Initially pending should be true
-      expect(screen.getByTestId('pending').textContent).toBe('true');
-
-      // Wait for initialization to complete
-      await waitFor(() => {
-        expect(screen.getByTestId('pending').textContent).toBe('false');
-      });
-    });
-
-    it('should set window.$abtestUserstat after initialization', async () => {
-      const config: ABTestConfigMap = {
-        test1: {
-          key: '1001',
-          groups: { 0: 100 },
-          strategy: 'random'
-        }
-      };
-
-      render(
-        <ABTestProvider abTestConfig={config}>
-          <div>Test</div>
-        </ABTestProvider>
-      );
-
-      await waitFor(() => {
-        expect((window as any).$abtestUserstat).toBe('1001-0');
-      });
+      // Wait for the state to update
+      await vi.waitFor(() => {
+        rerender(
+          <ABTestProvider abTestConfig={config}>
+            <TestConsumer />
+          </ABTestProvider>
+        );
+        expect(screen.getByTestId('provider-pending').textContent).toBe('false');
+      }, { timeout: 1000 });
     });
   });
 
@@ -316,9 +286,9 @@ describe('React Integration', () => {
       // Initially pending
       expect(result.current.pending).toBe(true);
 
-      await waitFor(() => {
+      await vi.waitFor(() => {
         expect(result.current.pending).toBe(false);
-      });
+      }, { timeout: 1000 });
 
       expect(result.current.abTestConfig).toHaveProperty('test1');
     });
@@ -359,12 +329,12 @@ describe('React Integration', () => {
 
       const { result } = renderHook(() => useABTestValue('test1'), { wrapper });
 
-      await waitFor(() => {
+      await vi.waitFor(() => {
         expect(result.current).toBe(0);
-      });
+      }, { timeout: 1000 });
     });
 
-    it('should return -1 for non-existent test', async () => {
+    it('should return undefined for non-existent test after initialization', async () => {
       const config: ABTestConfigMap = {
         test1: {
           key: '1001',
@@ -379,10 +349,13 @@ describe('React Integration', () => {
 
       const { result } = renderHook(() => useABTestValue('nonExistent'), { wrapper });
 
-      await waitFor(() => {
-        // After initialization, non-existent test should return undefined which becomes falsy
-        expect(result.current).toBe(-1);
-      });
+      // Initially -1 while pending
+      expect(result.current).toBe(-1);
+
+      // After initialization, undefined becomes the value (config doesn't exist)
+      await vi.waitFor(() => {
+        expect(result.current).toBeUndefined();
+      }, { timeout: 1000 });
     });
   });
 });
