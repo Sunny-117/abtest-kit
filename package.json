@@ -62,7 +62,7 @@
     "jsdom": "25.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "robuild": "^0.1.0",
+    "robuild": "^0.1.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   }
