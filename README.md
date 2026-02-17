@@ -513,10 +513,10 @@ resetGlobalCache();
 4. Call global splitting early in page load to ensure consistency
 5. Use different storageKeys for different tests to avoid conflicts
 
-# Additional Resources
 
-https://zhuanlan.zhihu.com/p/571901803
+# Design concept
 
+[here](./ARCHITECTURE.md)
 
 ## License
 

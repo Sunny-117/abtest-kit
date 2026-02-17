@@ -503,9 +503,8 @@ resetGlobalCache();
 4. 全局分流应在页面加载初期调用，以确保分流的一致性
 5. 为不同的测试使用不同的storageKey，避免冲突
 
-# 其他资料
-
-https://zhuanlan.zhihu.com/p/571901803
+# 设计思路
+[这里](./ARCHITECTURE.md)
 
 
 ## License
