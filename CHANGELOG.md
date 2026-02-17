@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.0.7
+
+[compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.6...v0.0.7)
+
+### 📖 Documentation
+
+- Add comprehensive architecture documentation ([39b1488](https://github.com/sunny-117/abtest-kit//commit/39b1488))
+
+### ❤️ Contributors
+
+- Sunny-117 <zhiqiangfu6@gmail.com>
+
 ## v0.0.6
 
 [compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.5...v0.0.6)
