@@ -1,6 +1,26 @@
 # Changelog
 
 
+## v0.0.6
+
+[compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.5...v0.0.6)
+
+### 🚀 Enhancements
+
+- Add custom cache storage support ([cc8c74d](https://github.com/sunny-117/abtest-kit//commit/cc8c74d))
+
+### 📖 Documentation
+
+- ✏️ update react import path ([b01c4f1](https://github.com/sunny-117/abtest-kit//commit/b01c4f1))
+
+### 🏡 Chore
+
+- 🤖 update robuild ([1fb70b3](https://github.com/sunny-117/abtest-kit//commit/1fb70b3))
+
+### ❤️ Contributors
+
+- Sunny-117 <zhiqiangfu6@gmail.com>
+
 ## v0.0.5
 
 [compare changes](https://github.com/sunny-117/abtest-kit//compare/v0.0.4...v0.0.5)
