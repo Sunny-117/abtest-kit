@@ -7,10 +7,6 @@
   <samp>🔧 Lightweight A/B testing SDK with multiple traffic splitting strategies and optional React integration, built with robuild, only 2.2 kb</samp>
 <br>
 <br>
-<!-- <a href='https://www.npmjs.com/package/abtest-kit'>
-<img src='https://img.shields.io/npm/v/abtest-kit?color=333&labelColor=555&style=flat-square' alt='version'/>
-</a>
-</p> -->
 
 [![Unit Test](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml)
 [![npm version][npm-version-src]][npm-version-href]
@@ -25,14 +21,14 @@
 
 **Core Features:**
 
-- 🚀 **Zero Dependencies Core**: Pure JavaScript implementation, works standalone
-- ⚛️ **Optional React Integration**: Provides Hooks and Context API
-- 🎯 **Multiple Splitting Strategies**: Random, CRC32, custom functions
-- 💾 **Persistent Storage**: localStorage-based result caching with custom storage support
-- 🔧 **Flexible Configuration**: Supports Baidu Analytics or fully custom
-- 📊 **Incremental Updates**: Smart config change detection and re-splitting
-- 🐛 **Debug Friendly**: URL parameter force hit, controllable logging
-- ✅ **High Test Coverage**: 100% core logic coverage, 94%+ overall coverage
+- **Zero Dependencies Core**: Pure JavaScript implementation, works standalone
+- **Optional React Integration**: Provides Hooks and Context API
+- **Multiple Splitting Strategies**: Random, CRC32, custom functions
+- **Persistent Storage**: localStorage-based result caching with custom storage support
+- **Flexible Configuration**: Supports Baidu Analytics or fully custom
+- **Incremental Updates**: Smart config change detection and re-splitting
+- **Debug Friendly**: URL parameter force hit, controllable logging
+- **High Test Coverage**: 100% core logic coverage, 94%+ overall coverage
 
 ## Installation
 
@@ -245,6 +241,17 @@ initGlobalABTest(config, {
 });
 ```
 
+**Why CRC32?**
+
+In **first-screen performance optimization** scenarios, we cannot wait for splitting results before determining the user path. CRC32 provides a **fast and stable** splitting solution:
+
+- **Problem with traditional approach**: `Math.random()` changes on every refresh, making it impossible to determine stable experiment group assignment, causing data alignment issues in performance analysis.
+- **CRC32 benefits**:
+  - Stable and reproducible experiment grouping
+  - No waiting for splitting results during first-screen loading
+  - Consistent numerator/denominator metrics for analytics
+  - Can be reproduced in SQL: `crc32(userId) % 100`
+
 ### Custom Strategy
 
 Pass a custom function to implement specific splitting logic.
@@ -297,129 +304,99 @@ import { ABTestProvider } from 'abtest-kit/react';
 </ABTestProvider>
 ```
 
-
-
 ## Data Flow
+
 ![flow](./assets/flow.png)
+
+## Architecture
+
+### Design Principles
+
+1. **Minimal Dependencies**: Core functionality has no framework dependencies
+2. **Progressive Enhancement**: React integration as optional extension
+3. **Flexible & Extensible**: Support custom strategies and cache implementations
+4. **Performance First**: Initialization <5ms, memory <1KB
+5. **Developer Experience**: Complete TypeScript type support
+
+### Architecture Layers
+
+```
++-------------------------------------------------------------+
+|                      Application Layer                       |
+|  +---------------------+  +-----------------------------+   |
+|  |   React Apps        |  |   Non-React Apps            |   |
+|  |   (Vue/Angular/JS)  |  |   (Early page load/Pure JS) |   |
+|  +----------+----------+  +--------------+--------------+   |
++-------------|-----------------------------|------------------+
+              |                             |
++-------------v-----------------------------v------------------+
+|                      SDK Entry Points                        |
+|  +---------------------+  +-----------------------------+   |
+|  |  abtest-kit/react   |  |       abtest-kit            |   |
+|  |  (~2.4 KB)          |  |       (~1.8 KB)             |   |
+|  |  - ABTestProvider   |  |  - initGlobalABTest         |   |
+|  |  - useABTest        |  |  - getGlobalABTestValue     |   |
+|  |  - useABTestValue   |  |  - setGlobalCache           |   |
+|  +----------+----------+  +--------------+--------------+   |
++-------------|-----------------------------|------------------+
+              |                             |
+              +-------------+---------------+
+                            |
++---------------------------v---------------------------------+
+|                      Core Layer                              |
+|  +--------------+ +--------------+ +----------------------+ |
+|  | Strategies   | | Storage      | | Utilities            | |
+|  | - Random     | | - CacheStorage| | - Logger            | |
+|  | - CRC32      | | - localStorage| | - forceHitTestFlag  | |
+|  | - Custom     | | - Custom impl | | - getConfigHash     | |
+|  | - BaiduTongji| +--------------+ +----------------------+ |
+|  +--------------+                                           |
++-------------------------------------------------------------+
+```
+
+### Incremental Update Algorithm
+
+```
+Input: new configMap
+      |
+Read from cache: storedResult, storedConfigHashes
+      |
+For each key in configMap:
+      |
+      +-- key exists in cache AND configHash unchanged?
+      |       -> Keep original value
+      |
+      +-- key exists in cache BUT configHash changed?
+      |       -> Re-split
+      |
+      +-- key not in cache?
+              -> New split
+      |
+Save new results (only keys in current configMap)
+      |
+Return splitting results
+```
+
+### Storage Structure
+
+```json
+{
+  "result": {
+    "experimentA": 0,
+    "experimentB": 1
+  },
+  "configHashes": {
+    "experimentA": "0:50|1:50",
+    "experimentB": "0:30|1:70"
+  }
+}
+```
 
 ## Advanced Features
 
-### Global Splitting API
-
-The global splitting feature allows automatic traffic splitting early in page load, without depending on React and Provider. Splitting results are stored in localStorage and permanently retained once saved, ensuring user splitting consistency.
-
-**Core Features:**
-- ✅ No React dependency, pure JavaScript implementation
-- ✅ Executes splitting on first call, subsequent calls read from cache
-- ✅ Splitting results are permanently retained, users won't change groups on page refresh
-- ✅ Supports Random (default) and CRC32 strategies
-- ✅ Developers can actively re-split via resetGlobalABTest()
-
-#### Basic Usage
-
-```javascript
-import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
-
-// Define global splitting configuration
-const globalABTestConfig = {
-  cardRecommendation: {
-    key: 'card_recommendation',
-    groups: {
-      0: 50,  // Control group 50%
-      1: 50   // Experiment group 50%
-    }
-  },
-  newFeature: {
-    key: 'newFeature',
-    groups: {
-      0: 50,  // Control group 50%
-      1: 50   // Experiment group 50%
-    },
-    // Custom splitting strategy for individual experiment (optional)
-    strategy: (groups) => {
-      // Date-based splitting example
-      const day = new Date().getDate();
-      return day % 2 === 0 ? 0 : 1;
-    }
-  }
-}
-
-// Initialize global splitting early in page load
-const result = initGlobalABTest(globalABTestConfig);
-console.log(result); // { cardRecommendation: 1, newFeature: 0 }
-
-// Get splitting value anywhere
-const cardTestValue = getGlobalABTestValue('cardRecommendation');
-console.log(cardTestValue); // 1
-```
-
-#### Using CRC32 Strategy
-
-```javascript
-const result = initGlobalABTest(globalABTestConfig, {
-  strategy: 'crc32',
-  userId: 'user_123456'
-});
-```
-
-#### Using Custom Splitting Strategy
-
-```javascript
-// Global custom strategy
-const myCustomStrategy = (groups) => {
-  const today = new Date().getDate();
-  return today % 2 === 0 ? 0 : 1;
-};
-
-const result = initGlobalABTest(globalABTestConfig, {
-  strategy: myCustomStrategy
-});
-
-// Per-experiment custom strategy
-const globalABTestConfig = {
-  experimentA: {
-    key: 'experimentA',
-    groups: { 0: 50, 1: 50 }
-  },
-  experimentB: {
-    key: 'experimentB',
-    groups: { 0: 50, 1: 50 },
-    strategy: (groups) => {
-      const hour = new Date().getHours();
-      return hour % 2 === 0 ? 0 : 1;
-    }
-  }
-};
-```
-
-#### Get Statistics String
-
-```javascript
-import { getGlobalABTestUserstat } from 'abtest-kit';
-
-// Get userstat after initialization
-const userstat = getGlobalABTestUserstat();
-// "card_recommendation-0;newFeature-1"
-
-// Report statistics
-window.$abtestUserstat = userstat;
-```
-
-#### Reset Splitting
-
-```javascript
-import { resetGlobalABTest, clearGlobalABTestCache } from 'abtest-kit';
-
-// Clear cache and re-split
-const newResult = resetGlobalABTest(globalABTestConfig);
-
-// Or just clear cache
-clearGlobalABTestCache();
-```
-
 ### Custom Cache Storage
 
-By default, splitting results are stored in `localStorage`. You can customize the cache implementation (e.g., IndexedDB, Cookie, sessionStorage) using `setGlobalCache`.
+By default, splitting results are stored in `localStorage`. You can customize the cache implementation using `setGlobalCache`.
 
 #### Cache Interface
 
@@ -436,14 +413,12 @@ interface CacheStorage {
 ```javascript
 import { setGlobalCache, initGlobalABTest } from 'abtest-kit';
 
-// Set to use sessionStorage
 setGlobalCache({
   getItem: (key) => sessionStorage.getItem(key),
   setItem: (key, value) => sessionStorage.setItem(key, value),
   removeItem: (key) => sessionStorage.removeItem(key)
 });
 
-// Subsequent splitting operations will use sessionStorage
 initGlobalABTest(config);
 ```
 
@@ -452,7 +427,6 @@ initGlobalABTest(config);
 ```javascript
 import { setGlobalCache } from 'abtest-kit';
 
-// Assuming you have cookie utility functions
 setGlobalCache({
   getItem: (key) => getCookie(key),
   setItem: (key, value) => setCookie(key, value, { expires: 365 }),
@@ -465,10 +439,8 @@ setGlobalCache({
 ```javascript
 import { setGlobalCache } from 'abtest-kit';
 
-// Wrap with synchronous interface (Note: IndexedDB is async, requires preloading)
 const cache = new Map();
 
-// Load data from IndexedDB to memory on initialization
 async function initCache() {
   const data = await loadFromIndexedDB();
   data.forEach((value, key) => cache.set(key, value));
@@ -478,11 +450,11 @@ setGlobalCache({
   getItem: (key) => cache.get(key) ?? null,
   setItem: (key, value) => {
     cache.set(key, value);
-    saveToIndexedDB(key, value); // Async save
+    saveToIndexedDB(key, value);
   },
   removeItem: (key) => {
     cache.delete(key);
-    removeFromIndexedDB(key); // Async delete
+    removeFromIndexedDB(key);
   }
 });
 ```
@@ -492,8 +464,27 @@ setGlobalCache({
 ```javascript
 import { resetGlobalCache } from 'abtest-kit';
 
-// Reset to default localStorage
 resetGlobalCache();
+```
+
+### Debug Tools
+
+**Force Hit Mode:**
+
+```
+https://example.com?forceHitTestFlag=experiment_a-1;experiment_b-0
+```
+
+- Force specify splitting results via URL parameters
+- Convenient for development and testing
+
+**Log Control:**
+
+```typescript
+import { logger, LogLevel } from 'abtest-kit';
+
+logger.setLevel(LogLevel.DEBUG);  // Enable detailed logs
+logger.setLevel(LogLevel.ERROR);  // Show errors only
 ```
 
 ## Important Notes
@@ -513,14 +504,25 @@ resetGlobalCache();
 4. Call global splitting early in page load to ensure consistency
 5. Use different storageKeys for different tests to avoid conflicts
 
+## Performance
 
-# Design concept
+| Metric | Value |
+|--------|-------|
+| Initialization time | <5ms |
+| Memory usage | <1KB |
+| Core bundle size | ~1.8KB (gzip) |
+| React bundle size | ~2.4KB (gzip) |
 
-[here](./ARCHITECTURE.md)
+## Compatibility
+
+- Browsers: Modern browsers supporting ES6+
+- React: 18.0+
+- Node.js: Requires localStorage polyfill for SSR
 
 ## License
 
-💛 [MIT](./LICENSE) License © [Sunny-117](https://github.com/Sunny-117)
+[MIT](./LICENSE) License © [Sunny-117](https://github.com/Sunny-117)
+
 <!-- Badges -->
 
 [npm-version-src]: https://img.shields.io/npm/v/abtest-kit?style=flat&colorA=080f12&colorB=1fa669

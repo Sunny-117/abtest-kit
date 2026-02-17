@@ -1,4 +1,12 @@
-# ABTest Kit
+<h1 align='center'>
+<samp>ABTest Kit <img src="https://img.shields.io/npm/v/abtest-kit?color=333&labelColor=555&style=flat-square" ></samp>
+</h1>
+
+
+<p align='center'>
+  <samp>轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成，基于 robuild 构建，仅 2.2 kb</samp>
+<br>
+<br>
 
 [![Unit Test](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sunny-117/abtest-kit/actions/workflows/unit-test.yml)
 [![npm version][npm-version-src]][npm-version-href]
@@ -7,22 +15,20 @@
 [![JSDocs][jsdocs-src]][jsdocs-href]
 [![License][license-src]][license-href]
 
-[English](./README.en.md)
+[English](./README.md) | 简体中文
 
 ## 简介
 
-🔧 轻量级 A/B 测试 SDK，支持多种分流策略和可选的 React 集成，基于 [robuild](https://github.com/Sunny-117/robuild) 构建，仅 2.2 kb
-
 **核心特性：**
 
-- 🚀 **无依赖核心**：纯 JavaScript 实现，可独立使用
-- ⚛️ **可选 React 集成**：提供 Hooks 和 Context API
-- 🎯 **多种分流策略**：Random、CRC32、自定义函数
-- 💾 **持久化存储**：基于 localStorage 的分流结果缓存，支持自定义缓存实现
-- 🔧 **灵活配置**：支持百度统计或完全自定义
-- 📊 **增量更新**：智能的配置变更检测和重新分流
-- 🐛 **调试友好**：URL 参数强制命中、可控日志输出
-- ✅ **高测试覆盖率**：核心逻辑 100% 覆盖，整体 94%+ 覆盖率
+- **无依赖核心**：纯 JavaScript 实现，可独立使用
+- **可选 React 集成**：提供 Hooks 和 Context API
+- **多种分流策略**：Random、CRC32、自定义函数
+- **持久化存储**：基于 localStorage 的分流结果缓存，支持自定义缓存实现
+- **灵活配置**：支持百度统计或完全自定义
+- **增量更新**：智能的配置变更检测和重新分流
+- **调试友好**：URL 参数强制命中、可控日志输出
+- **高测试覆盖率**：核心逻辑 100% 覆盖，整体 94%+ 覆盖率
 
 ## 安装
 
@@ -235,6 +241,17 @@ initGlobalABTest(config, {
 });
 ```
 
+**为什么需要 CRC32？**
+
+在 **首屏性能优化** 场景下，我们无法等待分流结果再决定用户路径，因此需要一种**快速且稳定**的分流方案：
+
+- **传统方案问题**：`Math.random()` 是基于 runtime 的，每次刷新都会变化，导致无法确定用户是否被稳定分流到某个实验组，这在性能分析中会造成数据对不齐的问题。
+- **CRC32 优势**：
+  - 实现**稳定、可复现**的实验分组
+  - 保证 **首屏加载无需等待分流结果**
+  - 确保 **分子、分母埋点统计口径一致**
+  - SQL 中可以直接使用 `crc32(userId) % 100` 进行分流
+
 ### 自定义策略
 
 传入自定义函数实现特定分流逻辑。
@@ -287,129 +304,99 @@ import { ABTestProvider } from 'abtest-kit/react';
 </ABTestProvider>
 ```
 
-
-
 ## 数据流
+
 ![flow](./assets/flow.png)
+
+## 架构设计
+
+### 设计原则
+
+1. **最小化依赖**：核心功能不依赖任何框架
+2. **渐进增强**：React 集成作为可选扩展
+3. **灵活可扩展**：支持自定义策略和缓存实现
+4. **性能优先**：初始化耗时 <5ms，内存占用 <1KB
+5. **开发体验**：完整的 TypeScript 类型支持
+
+### 架构分层
+
+```
++-------------------------------------------------------------+
+|                      应用层 (Application)                     |
+|  +---------------------+  +-----------------------------+   |
+|  |   React 应用        |  |   非 React 应用              |   |
+|  |   (Vue/Angular/原生) |  |   (页面加载初期/纯 JS)        |   |
+|  +----------+----------+  +--------------+--------------+   |
++-------------|-----------------------------|------------------+
+              |                             |
++-------------v-----------------------------v------------------+
+|                      SDK 接入层 (Entry Points)                |
+|  +---------------------+  +-----------------------------+   |
+|  |  abtest-kit/react   |  |       abtest-kit            |   |
+|  |  (~2.4 KB)          |  |       (~1.8 KB)             |   |
+|  |  - ABTestProvider   |  |  - initGlobalABTest         |   |
+|  |  - useABTest        |  |  - getGlobalABTestValue     |   |
+|  |  - useABTestValue   |  |  - setGlobalCache           |   |
+|  +----------+----------+  +--------------+--------------+   |
++-------------|-----------------------------|------------------+
+              |                             |
+              +-------------+---------------+
+                            |
++---------------------------v---------------------------------+
+|                      核心层 (Core)                            |
+|  +--------------+ +--------------+ +----------------------+ |
+|  | 分流策略      | | 存储管理      | | 工具函数             | |
+|  | - Random     | | - CacheStorage| | - Logger            | |
+|  | - CRC32      | | - localStorage| | - forceHitTestFlag  | |
+|  | - Custom     | | - 自定义实现   | | - getConfigHash     | |
+|  | - BaiduTongji| +--------------+ +----------------------+ |
+|  +--------------+                                           |
++-------------------------------------------------------------+
+```
+
+### 增量更新算法
+
+```
+输入: 新配置 configMap
+      |
+从缓存读取: storedResult, storedConfigHashes
+      |
+遍历 configMap 中每个 key:
+      |
+      +-- key 存在于缓存 且 configHash 未变？
+      |       -> 保持原值
+      |
+      +-- key 存在于缓存 但 configHash 变了？
+      |       -> 重新分流
+      |
+      +-- key 不存在于缓存？
+              -> 新分流
+      |
+保存新结果（只包含当前 configMap 的 key）
+      |
+返回分流结果
+```
+
+### 存储结构
+
+```json
+{
+  "result": {
+    "experimentA": 0,
+    "experimentB": 1
+  },
+  "configHashes": {
+    "experimentA": "0:50|1:50",
+    "experimentB": "0:30|1:70"
+  }
+}
+```
 
 ## 高级功能
 
-### 全局分流 API
-
-全局分流功能允许在页面加载初期自动进行分流，无需依赖React和Provider。分流结果存储在localStorage中，一旦保存就永久保留，确保用户的分流一致性。
-
-**核心特性：**
-- ✅ 无React依赖，纯JavaScript实现
-- ✅ 第一次调用时执行分流，后续直接读取缓存
-- ✅ 分流结果永久保留，用户不会因为刷新页面而改变分流组
-- ✅ 支持Random（默认）和CRC32两种策略
-- ✅ 开发者可以通过resetGlobalABTest()主动重新分流
-
-#### 基本使用
-
-```javascript
-import { initGlobalABTest, getGlobalABTestValue } from 'abtest-kit';
-
-// 定义全局分流配置
-const globalABTestConfig = {
-  cardRecommendation: {
-    key: 'card_recommendation',
-    groups: {
-      0: 50,  // 对照组 50%
-      1: 50   // 实验组 50%
-    }
-  },
-  newFeature: {
-    key: 'newFeature',
-    groups: {
-      0: 50,  // 对照组 50%
-      1: 50   // 实验组 50%
-    },
-    // 单个实验的自定义分流策略（可选）
-    strategy: (groups) => {
-      // 基于日期的分流示例
-      const day = new Date().getDate();
-      return day % 2 === 0 ? 0 : 1;
-    }
-  }
-}
-
-// 在页面加载初期初始化全局分流
-const result = initGlobalABTest(globalABTestConfig);
-console.log(result); // { cardRecommendation: 1, newFeature: 0 }
-
-// 在任何地方获取分流值
-const cardTestValue = getGlobalABTestValue('cardRecommendation');
-console.log(cardTestValue); // 1
-```
-
-#### 使用CRC32策略
-
-```javascript
-const result = initGlobalABTest(globalABTestConfig, {
-  strategy: 'crc32',
-  userId: 'user_123456'
-});
-```
-
-#### 使用自定义分流策略
-
-```javascript
-// 全局自定义策略
-const myCustomStrategy = (groups) => {
-  const today = new Date().getDate();
-  return today % 2 === 0 ? 0 : 1;
-};
-
-const result = initGlobalABTest(globalABTestConfig, {
-  strategy: myCustomStrategy
-});
-
-// 单个实验自定义策略
-const globalABTestConfig = {
-  experimentA: {
-    key: 'experimentA',
-    groups: { 0: 50, 1: 50 }
-  },
-  experimentB: {
-    key: 'experimentB',
-    groups: { 0: 50, 1: 50 },
-    strategy: (groups) => {
-      const hour = new Date().getHours();
-      return hour % 2 === 0 ? 0 : 1;
-    }
-  }
-};
-```
-
-#### 获取统计字符串
-
-```javascript
-import { getGlobalABTestUserstat } from 'abtest-kit';
-
-// 初始化后获取userstat
-const userstat = getGlobalABTestUserstat();
-// "card_recommendation-0;newFeature-1"
-
-// 上报统计
-window.$abtestUserstat = userstat;
-```
-
-#### 重置分流
-
-```javascript
-import { resetGlobalABTest, clearGlobalABTestCache } from 'abtest-kit';
-
-// 清除缓存并重新分流
-const newResult = resetGlobalABTest(globalABTestConfig);
-
-// 或仅清除缓存
-clearGlobalABTestCache();
-```
-
 ### 自定义缓存
 
-默认使用 `localStorage` 存储分流结果，你可以通过 `setGlobalCache` 自定义缓存实现（如 IndexedDB、Cookie、sessionStorage 等）。
+默认使用 `localStorage` 存储分流结果，你可以通过 `setGlobalCache` 自定义缓存实现。
 
 #### 缓存接口
 
@@ -426,14 +413,12 @@ interface CacheStorage {
 ```javascript
 import { setGlobalCache, initGlobalABTest } from 'abtest-kit';
 
-// 设置使用 sessionStorage
 setGlobalCache({
   getItem: (key) => sessionStorage.getItem(key),
   setItem: (key, value) => sessionStorage.setItem(key, value),
   removeItem: (key) => sessionStorage.removeItem(key)
 });
 
-// 之后的分流操作会使用 sessionStorage
 initGlobalABTest(config);
 ```
 
@@ -442,7 +427,6 @@ initGlobalABTest(config);
 ```javascript
 import { setGlobalCache } from 'abtest-kit';
 
-// 假设你有 cookie 操作函数
 setGlobalCache({
   getItem: (key) => getCookie(key),
   setItem: (key, value) => setCookie(key, value, { expires: 365 }),
@@ -455,10 +439,8 @@ setGlobalCache({
 ```javascript
 import { setGlobalCache } from 'abtest-kit';
 
-// 封装同步接口（注意：IndexedDB 是异步的，需要预加载数据）
 const cache = new Map();
 
-// 初始化时从 IndexedDB 加载数据到内存
 async function initCache() {
   const data = await loadFromIndexedDB();
   data.forEach((value, key) => cache.set(key, value));
@@ -468,11 +450,11 @@ setGlobalCache({
   getItem: (key) => cache.get(key) ?? null,
   setItem: (key, value) => {
     cache.set(key, value);
-    saveToIndexedDB(key, value); // 异步保存
+    saveToIndexedDB(key, value);
   },
   removeItem: (key) => {
     cache.delete(key);
-    removeFromIndexedDB(key); // 异步删除
+    removeFromIndexedDB(key);
   }
 });
 ```
@@ -482,8 +464,27 @@ setGlobalCache({
 ```javascript
 import { resetGlobalCache } from 'abtest-kit';
 
-// 重置为默认的 localStorage
 resetGlobalCache();
+```
+
+### 调试工具
+
+**强制命中模式：**
+
+```
+https://example.com?forceHitTestFlag=experiment_a-1;experiment_b-0
+```
+
+- 通过 URL 参数强制指定分流结果
+- 便于开发和测试
+
+**日志控制：**
+
+```typescript
+import { logger, LogLevel } from 'abtest-kit';
+
+logger.setLevel(LogLevel.DEBUG);  // 开启详细日志
+logger.setLevel(LogLevel.ERROR);  // 仅显示错误
 ```
 
 ## 注意事项
@@ -503,13 +504,25 @@ resetGlobalCache();
 4. 全局分流应在页面加载初期调用，以确保分流的一致性
 5. 为不同的测试使用不同的storageKey，避免冲突
 
-# 设计思路
-[这里](./ARCHITECTURE.md)
+## 性能指标
 
+| 指标 | 数值 |
+|------|------|
+| 初始化耗时 | <5ms |
+| 内存占用 | <1KB |
+| 核心包体积 | ~1.8KB (gzip) |
+| React 包体积 | ~2.4KB (gzip) |
+
+## 兼容性
+
+- 浏览器：支持 ES6+ 的现代浏览器
+- React：18.0+
+- Node.js：用于 SSR 时需提供 localStorage polyfill
 
 ## License
 
-💛 [MIT](./LICENSE) License © [Sunny-117](https://github.com/Sunny-117)
+[MIT](./LICENSE) License © [Sunny-117](https://github.com/Sunny-117)
+
 <!-- Badges -->
 
 [npm-version-src]: https://img.shields.io/npm/v/abtest-kit?style=flat&colorA=080f12&colorB=1fa669
